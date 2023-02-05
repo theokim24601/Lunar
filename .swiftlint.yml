@@ -1,0 +1,12 @@
+disabled_rules:
+  - colon
+  - comma
+  - force_try
+  - force_cast
+
+excluded:
+  - Tuist
+  - Derived
+
+force_try:
+  severity: warning # explicitly

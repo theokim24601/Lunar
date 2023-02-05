@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="SCDream2.otf">
+            <string>S-CoreDream-2ExtraLight</string>
+        </array>
+        <array key="SCDream4.otf">
+            <string>S-CoreDream-4Regular</string>
+        </array>
+        <array key="SpoqaHanSansNeo-Regular.otf">
+            <string>SpoqaHanSansNeo-Regular</string>
+        </array>
+    </customFonts>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="EventCell" rowHeight="164" id="jqc-Qe-O28" customClass="EventCell" customModule="Lunar" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="434" height="164"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="jqc-Qe-O28" id="VE0-J7-8Iu">
+                <rect key="frame" x="0.0" y="0.0" width="434" height="164"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zSw-Z1-MLa">
+                        <rect key="frame" x="13" y="4" width="406" height="156"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="dsO-3l-CEm">
+                                <rect key="frame" x="14" y="24" width="380" height="113"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="EE1-Tb-Eqi">
+                                        <rect key="frame" x="0.0" y="0.0" width="380" height="29"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="어머니 생신" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5B2-5A-1ye">
+                                                <rect key="frame" x="0.0" y="0.0" width="303.5" height="29"/>
+                                                <fontDescription key="fontDescription" name="SpoqaHanSansNeo-Regular" family="Spoqa Han Sans Neo" pointSize="23"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="252" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" text="10월 30일" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yso-yY-8Py">
+                                                <rect key="frame" x="303.5" y="0.0" width="76.5" height="29"/>
+                                                <fontDescription key="fontDescription" name="S-CoreDream-4Regular" family="S-Core Dream" pointSize="18"/>
+                                                <color key="textColor" name="date_solar"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
+                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="taw-Pv-H4L">
+                                        <rect key="frame" x="0.0" y="37" width="380" height="76"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="음력 10월 2일" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="y4A-c2-7ID">
+                                                <rect key="frame" x="0.0" y="0.0" width="380" height="76"/>
+                                                <fontDescription key="fontDescription" name="S-CoreDream-2ExtraLight" family="S-Core Dream" pointSize="12"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" name="background"/>
+                        <constraints>
+                            <constraint firstAttribute="bottom" secondItem="dsO-3l-CEm" secondAttribute="bottom" constant="19" id="6iH-n8-3hh"/>
+                            <constraint firstItem="dsO-3l-CEm" firstAttribute="leading" secondItem="zSw-Z1-MLa" secondAttribute="leading" constant="14" id="A62-Xj-ZO3"/>
+                            <constraint firstItem="dsO-3l-CEm" firstAttribute="top" secondItem="zSw-Z1-MLa" secondAttribute="top" constant="24" id="nMP-GP-wJ2"/>
+                            <constraint firstAttribute="trailing" secondItem="dsO-3l-CEm" secondAttribute="trailing" constant="12" id="z6M-Zt-UDN"/>
+                        </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="number" keyPath="cornerRadius">
+                                <real key="value" value="17"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
+                                <real key="value" value="0.69999999999999996"/>
+                            </userDefinedRuntimeAttribute>
+                            <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
+                                <color key="value" name="border"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
+                    </view>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="trailing" secondItem="zSw-Z1-MLa" secondAttribute="trailing" constant="15" id="33k-ap-fYy"/>
+                    <constraint firstAttribute="bottom" secondItem="zSw-Z1-MLa" secondAttribute="bottom" constant="4" id="CSz-4z-L2A"/>
+                    <constraint firstItem="zSw-Z1-MLa" firstAttribute="leading" secondItem="VE0-J7-8Iu" secondAttribute="leading" constant="13" id="Uts-F9-lup"/>
+                    <constraint firstItem="zSw-Z1-MLa" firstAttribute="top" secondItem="VE0-J7-8Iu" secondAttribute="top" constant="4" id="iCf-Fb-sO4"/>
+                </constraints>
+            </tableViewCellContentView>
+            <connections>
+                <outlet property="containerView" destination="zSw-Z1-MLa" id="MZX-Id-Ti1"/>
+                <outlet property="gregorianLabel" destination="Yso-yY-8Py" id="5b0-fN-cWe"/>
+                <outlet property="lunarLabel" destination="y4A-c2-7ID" id="GMY-kW-Far"/>
+                <outlet property="titleLabel" destination="5B2-5A-1ye" id="x4i-TT-tdV"/>
+            </connections>
+            <point key="canvasLocation" x="-504.34782608695656" y="180.80357142857142"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <namedColor name="background">
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="border">
+            <color red="0.84299999475479126" green="0.84299999475479126" blue="0.84299999475479126" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="date_solar">
+            <color red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+    </resources>
+</document>
