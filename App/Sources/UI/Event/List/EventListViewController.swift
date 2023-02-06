@@ -23,7 +23,7 @@ final class EventListViewController: BaseViewController {
 
   private var backgroundHeightConstraint: Constraint?
 
-  var eventEditFlow: (() -> Void)?
+  var eventEditFlow: ((EventEditMode) -> Void)?
   var eventUseCase: EventUseCase?
   var events: [Event] = []
 
@@ -152,7 +152,7 @@ final class EventListViewController: BaseViewController {
       completion: { _ in
         UIView.animate(withDuration: 0.1) {
           self.writeButton.transform = CGAffineTransform.identity
-          self.eventEditFlow?()
+          self.eventEditFlow?(.new)
           //          self.navigator?.show(.eventEdit(mode: .new, completion: self.reload), transition: .present)
         }
       })
@@ -167,16 +167,20 @@ final class EventListViewController: BaseViewController {
   func reload() {
 //    events = eventUseCase?.getAll() ?? []
     events = [
-      Event(title: "어머니 생신", date: Date()),
-      Event(title: "어머니 생신", date: Date()),
-      Event(title: "어머니 생신", date: Date()),
-      Event(title: "어머니 생신", date: Date()),
-      Event(title: "어머니 생신", date: Date()),
-      Event(title: "어머니 생신", date: Date()),
-      Event(title: "어머니 생신", date: Date()),
-      Event(title: "어머니 생신", date: Date()),
-      Event(title: "어머니 생신", date: Date()),
-      Event(title: "아버지 생신", date: Date())
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 7, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(title: "어머니 생신", month: 10, day: 23),
     ]
     tableView.reloadData()
 
@@ -222,7 +226,7 @@ extension EventListViewController: UITableViewDataSource {
 extension EventListViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     Vibration.medium.vibrate()
-    eventEditFlow?()
+    eventEditFlow?(.edit(events[indexPath.row]))
 //    navigator?.show(
 //      .eventEdit(
 //        mode: .edit(events[indexPath.row]),

@@ -14,9 +14,15 @@ class Event: Equatable, Comparable {
   var title: String?
   var date: Date? // lunar
 
-  init(title: String, date: Date) {
+  var lunarMonth: Int?
+  var lunarDay: Int?
+
+  init() {}
+
+  init(title: String, month: Int, day: Int) {
     self.title = title
-    self.date = date
+    self.lunarMonth = month
+    self.lunarDay = day
   }
 
   init(event: RealmEvent) {
@@ -29,6 +35,8 @@ class Event: Equatable, Comparable {
     self.id = event.id
     self.title = event.title
     self.date = event.date
+    self.lunarMonth = event.lunarMonth
+    self.lunarDay = event.lunarDay
   }
 
   func convertForRealm() -> RealmEvent {
@@ -55,5 +63,22 @@ class Event: Equatable, Comparable {
     guard let date1 = lhs.date?.toNearestFutureIncludingToday() else { return true }
     guard let date2 = rhs.date?.toNearestFutureIncludingToday() else { return true }
     return date2.compare(date1) == .orderedDescending
+  }
+
+  func toNearestFutureIncludingToday() -> Date? {
+    let dateComps = DateComponents(month: lunarMonth, day: lunarDay)
+    guard var target = Calendar.chinese.date(from: dateComps) else {
+      return nil
+    }
+    let aYear = DateComponents(year: 1)
+    while target.compare(Date.current) == .orderedAscending {
+      let nextYearTarget = Calendar.chinese.date(byAdding: aYear, to: target)!
+      target = nextYearTarget
+    }
+    return target
+  }
+
+  func copy() -> Event {
+    return Event(event: self)
   }
 }

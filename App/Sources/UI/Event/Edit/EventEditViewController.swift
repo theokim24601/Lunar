@@ -20,7 +20,7 @@ enum EventEditMode: Equatable {
     }
   }
 
-  var startDate: Date {
+  var eventDate: Date {
     switch self {
     case .new: return Date()
     case .edit(let event): return event.date ?? Date()
@@ -44,6 +44,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
 //  private var titleContainerView: UIView!
   private var titleField: UITextField!
   private var lunarDateForm: DateFormView!
+  private var solarDateForm: DateFormView!
 
 //  private var yearContainerView: UIView!
 //  private var yearField: UITextField!
@@ -65,6 +66,13 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
 //  var eventUseCase: EventUseCase?
 //
   var mode: EventEditMode = .new
+  lazy var current: Event = {
+    var newEvent = Event()
+    if case .edit(let event) = mode {
+      newEvent = event.copy()
+    }
+    return newEvent
+  }()
 //  var current = Date() {
 //    didSet {
 //      yearField.text = "\(Calendar.gregorian.component(.year, from: current))"
@@ -74,7 +82,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
 //    }
 //  }
 //
-//  var didEditFinish: (() -> Void)?
+  var didEditFinish: (() -> Void)?
 //
 //  private lazy var toolbar: UIToolbar = {
 //    let toolbar = UIToolbar()
@@ -154,6 +162,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
     }
 
     titleField = UITextField().apply {
+      $0.text = mode.eventTitle
       $0.placeholder = "제목을 입력해주세요"
       $0.font = .preferredFont(.medium, size: 16)
       $0.textColor = .t1lPrimaryText1
@@ -193,8 +202,15 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         stackView.addArrangedSubview($0)
       }
 
-      lunarDateForm = DateFormView().apply {
-        $0.editable = true
+      lunarDateForm = DateFormView(short: true, editable: true, calendar: .chinese, year: nil, month: current.lunarMonth, day: current.lunarDay).apply {
+        $0.completion = { [weak self] month, day in
+          self?.current.lunarMonth = month
+          self?.current.lunarDay = day
+
+          if let date = self?.current.toNearestFutureIncludingToday() {
+            self?.solarDateForm.updateDate(year: date.year, month: date.month, day: date.day)
+          }
+        }
         stackView.addArrangedSubview($0)
       }
     }
@@ -216,8 +232,14 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         stackView.addArrangedSubview($0)
       }
 
-      DateFormView().apply {
-        $0.editable = false
+      var y, m, d: Int?
+      if let date = current.toNearestFutureIncludingToday() {
+        let comps = Calendar.gregorian.dateComponents([.year, .month, .day], from: date)
+        y = comps.year
+        m = comps.month
+        d = comps.day
+      }
+      solarDateForm = DateFormView(short: false, editable: false, calendar: .gregorian, year: y, month: m, day: d).apply {
         stackView.addArrangedSubview($0)
       }
     }
@@ -307,6 +329,15 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         $0.isHidden = true
         stackView.addArrangedSubview($0)
       }
+
+      if case .edit = mode {
+        deleteButton.isHidden = false
+        editButton.isHidden = false
+      } else {
+        deleteButton.isHidden = true
+        editButton.isHidden = true
+      }
+      createButton.isHidden = true
     }
 
     SizedView(height: 28).apply {
@@ -592,29 +623,29 @@ extension EventEditViewController {
     private var mdDivider: UILabel!
     private var dayTextField: UITextField!
 
-    var editable: Bool = true {
-      didSet {
-        if editable {
-          yearTextField.textColor = .t1lPrimaryText1
-          ymDivider.textColor = .t1lSecondaryColor1
-          monthTextField.textColor = .t1lPrimaryText1
-          mdDivider.textColor = .t1lSecondaryColor1
-          dayTextField.textColor = .t1lPrimaryText1
-        } else {
-          yearTextField.textColor = .t1lSecondaryColor1
-          yearTextField.isEnabled = false
-          ymDivider.textColor = .t1lSecondaryColor1
-          monthTextField.textColor = .t1lSecondaryColor1
-          monthTextField.isEnabled = false
-          mdDivider.textColor = .t1lSecondaryColor1
-          dayTextField.textColor = .t1lSecondaryColor1
-          dayTextField.isEnabled = false
-        }
-      }
+    var short: Bool
+    var editable: Bool
+    var calendar: Calendar
+    var year: Int?
+    var month: Int?
+    var day: Int?
+    var completion: ((Int, Int) -> Void)?
+    init(short: Bool, editable: Bool, calendar: Calendar, year: Int?, month: Int?, day: Int?) {
+      self.short = short
+      self.editable = editable
+      self.calendar = calendar
+      self.year = year
+      self.month = month
+      self.day = day
+      super.init(frame: .zero)
+    }
+
+    required init?(coder: NSCoder) {
+      fatalError("init(coder:) has not been implemented")
     }
 
     override func becomeFirstResponder() -> Bool {
-      if yearTextField.text?.count ?? 0 < yearLength {
+      if !short && yearTextField.text?.count ?? 0 < yearLength {
         return yearTextField.becomeFirstResponder()
       } else if monthTextField.text?.count ?? 0 < monthLength {
         return monthTextField.becomeFirstResponder()
@@ -633,33 +664,46 @@ extension EventEditViewController {
         addSubview($0)
       }
 
-      yearTextField = UITextField().apply {
-        $0.placeholder = "YYYY"
-        $0.font = .preferredFont(.medium, size: 14)
-        $0.keyboardType = .numberPad
-        $0.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        $0.delegate = self
-        stackView.addArrangedSubview($0)
-      }
+      if !short {
+        yearTextField = UITextField().apply {
+          $0.placeholder = "YYYY"
+          $0.font = .preferredFont(.medium, size: 14)
+          $0.textColor = editable ? .t1lPrimaryText1 : .t1lSecondaryColor1
+          $0.isEnabled = editable
+          $0.keyboardType = .numberPad
+          $0.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+          $0.delegate = self
+          if let year {
+            $0.text = "\(year)"
+          }
+          stackView.addArrangedSubview($0)
+        }
 
-      ymDivider = UILabel().apply {
-        $0.text = "/"
-        $0.font = .preferredFont(.bold, size: 14)
-        stackView.addArrangedSubview($0)
+        ymDivider = UILabel().apply {
+          $0.text = "/"
+          $0.textColor = .t1lSecondaryColor1
+          $0.font = .preferredFont(.bold, size: 14)
+          stackView.addArrangedSubview($0)
+        }
       }
 
       monthTextField = UITextField().apply {
         $0.placeholder = "MM"
         $0.font = .preferredFont(.medium, size: 14)
-        $0.textColor = .t1lPrimaryText1
+        $0.textColor = editable ? .t1lPrimaryText1 : .t1lSecondaryColor1
+        $0.isEnabled = editable
         $0.keyboardType = .numberPad
         $0.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         $0.delegate = self
+        if let month {
+          $0.text = "\(month)".leftPadding(toLength: monthLength, withPad: "0")
+        }
         stackView.addArrangedSubview($0)
       }
 
       mdDivider = UILabel().apply {
         $0.text = "/"
+        $0.textColor = .t1lSecondaryColor1
         $0.font = .preferredFont(.bold, size: 14)
         stackView.addArrangedSubview($0)
       }
@@ -667,10 +711,14 @@ extension EventEditViewController {
       dayTextField = UITextField().apply {
         $0.placeholder = "dd"
         $0.font = .preferredFont(.medium, size: 14)
-        $0.textColor = .t1lPrimaryText1
+        $0.textColor = editable ? .t1lPrimaryText1 : .t1lSecondaryColor1
+        $0.isEnabled = editable
         $0.keyboardType = .numberPad
         $0.delegate = self
         $0.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        if let day {
+          $0.text = "\(day)".leftPadding(toLength: dayLength, withPad: "0")
+        }
         stackView.addArrangedSubview($0)
       }
     }
@@ -707,6 +755,13 @@ extension EventEditViewController {
           cutOverflowedText(textField: textField, length: dayLength)
         }
       }
+
+      if editable,
+         let month = monthTextField.text,
+         let day = dayTextField.text,
+         verifyDate(month: month, day: day) {
+        completion?(Int(month)!, Int(day)!)
+      }
     }
 
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
@@ -734,6 +789,35 @@ extension EventEditViewController {
         let index = text.index(text.startIndex, offsetBy: length)
         let newString = text[text.startIndex..<index]
         textField.text = String(newString)
+      }
+    }
+
+    func verifyDate(month ms: String?, day ds: String?) -> Bool {
+      guard
+        let ms, ms.count == monthLength,
+        let m = Int(ms),
+        let ds, ds.count == dayLength,
+        let d = Int(ds)
+      else { return false }
+
+      let dateComps = DateComponents(
+        calendar: .current,
+        year: Date.currentYear,
+        month: m,
+        day: d
+      )
+      return dateComps.isValidDate
+    }
+
+    func updateDate(year: Int?, month: Int?, day: Int?) {
+      if let year {
+        yearTextField.text = "\(year)"
+      }
+      if let month {
+        monthTextField.text = "\(month)".leftPadding(toLength: monthLength, withPad: "0")
+      }
+      if let day {
+        dayTextField.text = "\(day)".leftPadding(toLength: dayLength, withPad: "0")
       }
     }
   }

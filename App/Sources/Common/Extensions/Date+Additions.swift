@@ -1,5 +1,5 @@
 //
-//  Date+Formatter.swift
+//  Date+Additions.swift
 //  Lunar
 //
 //  Created by hbkim on 2023/11/16.
@@ -18,6 +18,16 @@ extension Date {
   var year: Int {
     let components = Calendar.current.dateComponents([.year], from: self)
     return components.year ?? 0
+  }
+
+  var month: Int {
+    let components = Calendar.current.dateComponents([.month], from: self)
+    return components.month ?? 0
+  }
+
+  var day: Int {
+    let components = Calendar.current.dateComponents([.day], from: self)
+    return components.day ?? 0
   }
 
   func toNearestFutureIncludingToday() -> Self? {

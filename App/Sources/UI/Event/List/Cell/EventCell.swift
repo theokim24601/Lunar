@@ -17,10 +17,15 @@ final class EventCell: BaseTableViewCell {
 
   var event: Event? {
     didSet {
-      guard let event = self.event else { return }
-      titleLabel.text = event.title
-      lunarLabel.text = "음력 ".appending(event.date?.stringForLunar() ?? "")
-      gregorianLabel.text = event.date?
+      guard
+        let event,
+        let title = event.title,
+        let month = event.lunarMonth,
+        let day = event.lunarDay
+      else { return }
+      titleLabel.text = title
+      lunarLabel.text = "음력 ".appending("\(month)월 \(day)일")
+      gregorianLabel.text = event
         .toNearestFutureIncludingToday()?
         .stringForSolar()
     }

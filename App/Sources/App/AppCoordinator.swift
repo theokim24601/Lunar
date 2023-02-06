@@ -59,8 +59,8 @@ final class AppCoordinator {
   private func runEventListFlow() {
     let vc = EventListViewController()
     vc.eventUseCase = CompositionRoot.eventUseCase
-    vc.eventEditFlow = { [weak self] in
-      self?.showEventEditFlow()
+    vc.eventEditFlow = { [weak self] eventEditMode in
+      self?.showEventEditFlow(eventEditMode: eventEditMode)
     }
     navigationController.setViewControllers(
       [vc],
@@ -69,11 +69,15 @@ final class AppCoordinator {
     window.rootViewController = navigationController
   }
 
-  private func showEventEditFlow() {
+  private func showEventEditFlow(eventEditMode mode: EventEditMode) {
     let vc = EventEditViewController()
+    vc.mode = mode
     vc.modalPresentationStyle = .overFullScreen
+    vc.didEditFinish = { [weak self] in
+      self?.navigationController.dismiss(animated: false)
+    }
 //    vc.eventUseCase = CompositionRoot.eventUseCase
-    window.rootViewController?.present(vc, animated: false)
+    navigationController.present(vc, animated: false)
   }
 
   private func pushSettingFlow() {
