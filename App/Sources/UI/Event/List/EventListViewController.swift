@@ -39,19 +39,19 @@ final class EventListViewController: BaseViewController {
     fadeTextAnimation.duration = 0.5
     fadeTextAnimation.type = .fade
 
-    view.backgroundColor = .t1lPrimaryFill2
+    view.backgroundColor = .el_background
 
     navigationController?.navigationBar.layer.add(fadeTextAnimation, forKey: "fadeText")
     navigationItem.title = "음력 일정"
     navigationController?.view.backgroundColor = .clear
     navigationController?.navigationBar.prefersLargeTitles = true
     navigationController?.navigationBar.largeTitleTextAttributes = [
-      NSAttributedString.Key.foregroundColor: UIColor.t1lPrimaryText2,
+      NSAttributedString.Key.foregroundColor: UIColor.el_navi_title,
       NSAttributedString.Key.font: UIFont.preferredFont(.medium, size: 34)
     ]
 
     navigationController?.navigationBar.titleTextAttributes = [
-      NSAttributedString.Key.foregroundColor: UIColor.t1lPrimaryText2,
+      NSAttributedString.Key.foregroundColor: UIColor.el_navi_title,
       NSAttributedString.Key.font: UIFont.preferredFont(.regular, size: 16)
     ]
     navigationController?.navigationBar.barStyle = .black
@@ -67,7 +67,7 @@ final class EventListViewController: BaseViewController {
     tableView.separatorStyle = .none
     tableView.dataSource = self
     tableView.delegate = self
-    tableView.backgroundColor = .t1lPrimaryFill2
+    tableView.backgroundColor = .el_tableView
     tableView.sectionFooterHeight = 0
     tableView.tableFooterView = UIView()
     tableView.alwaysBounceVertical = false
@@ -86,8 +86,8 @@ final class EventListViewController: BaseViewController {
     let addImage = "btn_event_add".uiImage?.withRenderingMode(.alwaysTemplate)
     writeButton.setImage(addImage, for: .normal)
     writeButton.setImage(addImage, for: .highlighted)
-    writeButton.tintColor = .t1lPrimaryText2
-    writeButton.backgroundColor = .t1lPrimaryFill1
+    writeButton.tintColor = .el_write_tint
+    writeButton.backgroundColor = .el_write_background
     writeButton.layer.cornerRadius = 30
     writeButton.layer.shadowColor = UIColor.gray.cgColor
     writeButton.layer.shadowOpacity = 1.0

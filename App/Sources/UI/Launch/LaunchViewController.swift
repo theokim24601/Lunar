@@ -13,39 +13,60 @@ final class LaunchViewController: BaseViewController {
 
   var finishFlow: (() -> Void)?
 
-  private var logoLabel: UILabel!
   private var imageView: UIImageView!
+  private var logoLabel: UILabel!
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    animateSplash()
+  }
 
   override func setupViews() {
-    logoLabel = UILabel()
-    logoLabel.text = "음력을\n알려줘"
-    logoLabel.numberOfLines = 0
-    logoLabel.font = .preferredFont(.regular, size: 24)
-    view.addSubview(logoLabel)
+    view.backgroundColor = .sp_background
 
-    imageView = UIImageView()
-    imageView.image = "ic_moon_light_off".uiImage
-    view.addSubview(imageView)
+    imageView = UIImageView().apply {
+      $0.image = "bg_splash".uiImage
+      view.addSubview($0)
+    }
+
+    logoLabel = UILabel().apply {
+      $0.text = "음력을\n알려줘"
+      $0.numberOfLines = 0
+      $0.alpha = 0
+      $0.textColor = .t1l_t1
+      $0.font = .preferredFont(.medium, size: 28)
+      view.addSubview($0)
+    }
   }
 
   override func setupConstraints() {
-    logoLabel.snp.makeConstraints {
-      $0.centerX.centerY.equalToSuperview()
-    }
     imageView.snp.makeConstraints {
-      $0.trailing.equalTo(logoLabel.snp.leading).offset(8)
-      $0.bottom.equalTo(logoLabel.snp.top)
+      $0.edges.equalToSuperview()
+    }
+
+    logoLabel.snp.makeConstraints {
+      $0.leading.equalToSuperview().offset(90)
+      $0.bottom.equalToSuperview().offset(-120)
     }
   }
 
-  override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    
-    Timer.scheduledTimer(withTimeInterval: 1.5, repeats: false) { [weak self] _ in
-      self?.imageView.image = "ic_moon_light_on".uiImage
-      Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
-        self?.finishFlow?()
-      }
-    }
+  func animateSplash() {
+    imageView.transform = CGAffineTransform(translationX: 0, y: 20)
+    imageView.alpha = 0
+
+    UIView.animate(withDuration: 1, delay: 0.25, options: .curveEaseOut, animations: {
+      self.imageView.transform = CGAffineTransform.identity
+      self.imageView.alpha = 1
+    })
+
+    logoLabel.transform = CGAffineTransform(translationX: 0, y: 20)
+    logoLabel.alpha = 0
+
+    UIView.animate(withDuration: 1.25, delay: 1, options: .curveEaseOut, animations: {
+      self.logoLabel.transform = CGAffineTransform.identity
+      self.logoLabel.alpha = 1
+    }, completion: { _ in
+      self.finishFlow?()
+    })
   }
 }

@@ -165,7 +165,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
       $0.text = mode.eventTitle
       $0.placeholder = "제목을 입력해주세요"
       $0.font = .preferredFont(.medium, size: 16)
-      $0.textColor = .t1lPrimaryText1
+      $0.textColor = .ee_title
       $0.autocorrectionType = .no
       $0.autocapitalizationType = .none
       $0.enablesReturnKeyAutomatically = true
@@ -180,7 +180,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
 
     UILabel().apply {
       $0.font = .preferredFont(.medium, size: 12)
-      $0.textColor = .t1lPrimaryText3
+      $0.textColor = .ee_dateLabel
       $0.text = "날짜"
       contentView.addArrangedSubview($0)
     }
@@ -197,7 +197,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
 
       UILabel().apply {
         $0.font = .preferredFont(.medium, size: 16)
-        $0.textColor = .t1lPrimaryText1
+        $0.textColor = .ee_lunarLabel
         $0.text = "음력 날짜"
         stackView.addArrangedSubview($0)
       }
@@ -227,7 +227,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
 
       UILabel().apply {
         $0.font = .preferredFont(.medium, size: 16)
-        $0.textColor = .t1lPrimaryText1
+        $0.textColor = .ee_gregorianLabel
         $0.text = "가까운 미래 날짜"
         stackView.addArrangedSubview($0)
       }
@@ -250,7 +250,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
 
     UILabel().apply {
       $0.font = .preferredFont(.medium, size: 12)
-      $0.textColor = .t1lPrimaryText3
+      $0.textColor = .ee_detail
       $0.text = "상세"
       contentView.addArrangedSubview($0)
     }
@@ -268,20 +268,20 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
 
       UIImageView().apply {
         $0.image = "t1l_ic_cloud".uiImage
-        $0.tintColor = .t1lPrimaryText1
+        $0.tintColor = .ee_calendarImgTint
         $0.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         stackView.addArrangedSubview($0)
       }
 
       UILabel().apply {
         $0.font = .preferredFont(.medium, size: 16)
-        $0.textColor = .t1lPrimaryText1
+        $0.textColor = .ee_calendarReg
         $0.text = "캘린더에 등록"
         stackView.addArrangedSubview($0)
       }
 
       UISwitch().apply {
-        $0.onTintColor = .t1lPrimaryFill1
+        $0.onTintColor = .ee_calendarSwitchTint
         $0.isOn = true
         stackView.addArrangedSubview($0)
       }
@@ -312,7 +312,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
       }
 
       editButton = UIButton().apply {
-        $0.backgroundColor = .t1lPrimaryFill1
+        $0.backgroundColor = .ee_edit
         $0.setTitle("수정", for: .normal)
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = .preferredFont(.medium, size: 14)
@@ -321,7 +321,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
       }
 
       createButton = UIButton().apply {
-        $0.backgroundColor = .t1lPrimaryFill1
+        $0.backgroundColor = .ee_edit
         $0.setTitle("추가", for: .normal)
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = .preferredFont(.medium, size: 14)
@@ -668,7 +668,7 @@ extension EventEditViewController {
         yearTextField = UITextField().apply {
           $0.placeholder = "YYYY"
           $0.font = .preferredFont(.medium, size: 14)
-          $0.textColor = editable ? .t1lPrimaryText1 : .t1lSecondaryColor1
+          $0.textColor = editable ? .ee_date_editable : .ee_date_disable
           $0.isEnabled = editable
           $0.keyboardType = .numberPad
           $0.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
@@ -681,7 +681,7 @@ extension EventEditViewController {
 
         ymDivider = UILabel().apply {
           $0.text = "/"
-          $0.textColor = .t1lSecondaryColor1
+          $0.textColor = .ee_date_slash
           $0.font = .preferredFont(.bold, size: 14)
           stackView.addArrangedSubview($0)
         }
@@ -690,7 +690,7 @@ extension EventEditViewController {
       monthTextField = UITextField().apply {
         $0.placeholder = "MM"
         $0.font = .preferredFont(.medium, size: 14)
-        $0.textColor = editable ? .t1lPrimaryText1 : .t1lSecondaryColor1
+        $0.textColor = editable ? .ee_date_editable : .ee_date_disable
         $0.isEnabled = editable
         $0.keyboardType = .numberPad
         $0.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
@@ -703,7 +703,7 @@ extension EventEditViewController {
 
       mdDivider = UILabel().apply {
         $0.text = "/"
-        $0.textColor = .t1lSecondaryColor1
+        $0.textColor = .ee_date_slash
         $0.font = .preferredFont(.bold, size: 14)
         stackView.addArrangedSubview($0)
       }
@@ -711,7 +711,7 @@ extension EventEditViewController {
       dayTextField = UITextField().apply {
         $0.placeholder = "dd"
         $0.font = .preferredFont(.medium, size: 14)
-        $0.textColor = editable ? .t1lPrimaryText1 : .t1lSecondaryColor1
+        $0.textColor = editable ? .ee_date_editable : .ee_date_disable
         $0.isEnabled = editable
         $0.keyboardType = .numberPad
         $0.delegate = self
@@ -740,13 +740,13 @@ extension EventEditViewController {
       if textField == yearTextField {
         if text.count >= yearLength {
           monthTextField.becomeFirstResponder()
-          ymDivider.textColor = .t1lSecondaryColor2
+          ymDivider.textColor = .ee_date_editable
           cutOverflowedText(textField: textField, length: yearLength)
         }
       } else if textField == monthTextField {
         if text.count >= monthLength {
           dayTextField.becomeFirstResponder()
-          mdDivider.textColor = .t1lSecondaryColor2
+          mdDivider.textColor = .ee_date_editable
           cutOverflowedText(textField: textField, length: monthLength)
         }
       } else if textField == dayTextField {

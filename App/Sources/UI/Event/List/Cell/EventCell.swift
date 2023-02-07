@@ -39,7 +39,7 @@ final class EventCell: BaseTableViewCell {
     containerView = UIView()
     containerView.backgroundColor = .white
     containerView.layer.cornerRadius = 28
-    containerView.layer.shadowColor = UIColor(hex: 0xEEEEEE).cgColor
+    containerView.layer.shadowColor = UIColor.grayEEE.cgColor
     containerView.layer.shadowOpacity = 3.0
     containerView.layer.shadowOffset = .zero
     containerView.layer.shadowRadius = 6
@@ -55,19 +55,19 @@ final class EventCell: BaseTableViewCell {
     titleLabel = UILabel()
     titleLabel.numberOfLines = 0
     titleLabel.font = .preferredFont(.medium, size: 16)
-    titleLabel.textColor = .t1lPrimaryText1
+    titleLabel.textColor = .ec_title
     coreView.addArrangedSubview(titleLabel)
 
     lunarLabel = UILabel()
     lunarLabel.numberOfLines = 1
     lunarLabel.font = .preferredFont(.light, size: 12)
-    lunarLabel.textColor = .t1lPrimaryText1
+    lunarLabel.textColor = .ec_lunarLabel
     coreView.addArrangedSubview(lunarLabel)
 
     gregorianLabel = UILabel()
     gregorianLabel.numberOfLines = 1
     gregorianLabel.font = .preferredFont(.regular, size: 14)
-    gregorianLabel.textColor = .t1lPrimaryText1
+    gregorianLabel.textColor = .ec_gregorianLabel
     containerView.addSubview(gregorianLabel)
   }
 
