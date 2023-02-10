@@ -24,9 +24,9 @@ final class EventUseCase {
   }
 
   func newEvent(_ event: Event) async -> Result<Event, Error> {
-    let settings = settingRepository.current
+    let providers = await syncUpProviderStatus()
     do {
-      let event = try await calendarRepository.newEvent(event: event, providers: settings.onProviders)
+      let event = try calendarRepository.newEvent(event: event, providers: providers)
       return .success(event)
     } catch (let error) {
       return .failure(error)
@@ -34,9 +34,9 @@ final class EventUseCase {
   }
 
   func update(_ event: Event) async -> Result<Event, Error> {
-    let settings = settingRepository.current
+    let providers = await syncUpProviderStatus()
     do {
-      let event = try await calendarRepository.updateEvent(event: event, providers: settings.onProviders)
+      let event = try calendarRepository.updateEvent(event: event, providers: providers)
       return .success(event)
     } catch (let error) {
       print("Failed to update the event with error - \(error.localizedDescription)")
@@ -45,11 +45,27 @@ final class EventUseCase {
   }
 
   func delete(_ id: String) async {
-    let settings = settingRepository.current
+    let providers = await syncUpProviderStatus()
     do {
-      try await calendarRepository.deleteEvent(id, providers: settings.onProviders)
+      try calendarRepository.deleteEvent(id, providers: providers)
     } catch (let error) {
       print("Failed to delete the event with error - \(error.localizedDescription)")
     }
+  }
+}
+
+private extension EventUseCase {
+  func syncUpProviderStatus() async -> [CalendarProvider] {
+    var providers: [CalendarProvider] = []
+    for provider in settingRepository.current.onProviders {
+      let accessGranted = await calendarRepository.verifyAuthorizationStatus(provider: provider)
+      if accessGranted {
+        providers.append(provider)
+      } else {
+        let newProviderSetting = CalendarProviderSetting(provider: provider, sync: false)
+        _ = settingRepository.updateProviderSetting(setting: newProviderSetting)
+      }
+    }
+    return providers
   }
 }

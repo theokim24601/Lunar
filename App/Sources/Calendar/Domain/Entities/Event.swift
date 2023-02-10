@@ -16,8 +16,6 @@ class Event: Equatable, Comparable {
   var lunarDay: Int
   var syncCalendar: Bool
 
-  init() {}
-
   init(id: String?, title: String, month: Int, day: Int, syncCalendar: Bool) {
     self.id = id
     self.title = title
@@ -43,15 +41,15 @@ class Event: Equatable, Comparable {
   }
 
   static func < (lhs: Event, rhs: Event) -> Bool {
-    guard let date1 = lhs.toNearestFutureIncludingToday() else { return true }
-    guard let date2 = rhs.toNearestFutureIncludingToday() else { return true }
+    guard let date1 = CalendarUtil.nearestFutureSolarIncludingToday(month: lhs.lunarMonth, day: lhs.lunarDay) else { return true }
+    guard let date2 = CalendarUtil.nearestFutureSolarIncludingToday(month: rhs.lunarMonth, day: rhs.lunarDay) else { return true }
     return date2.compare(date1) == .orderedDescending
   }
 }
 
-extension Event {
-  func toNearestFutureIncludingToday() -> Date? {
-    let dateComps = DateComponents(month: lunarMonth, day: lunarDay)
+class CalendarUtil {
+  static func nearestFutureSolarIncludingToday(month: Int?, day: Int?) -> Date? {
+    let dateComps = DateComponents(month: month, day: day)
     guard var target = Calendar.chinese.date(from: dateComps) else {
       return nil
     }

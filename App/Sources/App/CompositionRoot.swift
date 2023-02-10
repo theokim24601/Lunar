@@ -51,22 +51,18 @@ extension CompositionRoot {
     )
   }()
 
-  static var settingRepository: SettingRepositoryType = {
-    return SettingRepository()
+  static var settingRepository: SettingRepository = {
+    return SettingRepositoryImpl()
   }()
 
-  static var calendarRepository: CalendarRepositoryType = {
-    return CalendarRepository(
-      local: CalendarLocalDataSource(
-        database: CalendarDatabase()
-      ),
-      remote: CalendarRemoteDataSource(
-        calServices: [appleCalendarService]
-      )
+  static var calendarRepository: CalendarRepository = {
+    return CalendarRepositoryImpl(
+      local: RealmCalendarDataSource(),
+      remoteDataSources: [appleCalendarService]
     )
   }()
 
-  static var appleCalendarService: CalendarServiceType = {
+  static var appleCalendarService: CalendarRemoteDataSource = {
     return AppleCalendarService()
   }()
 }

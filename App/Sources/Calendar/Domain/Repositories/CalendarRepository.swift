@@ -8,10 +8,11 @@
 
 protocol CalendarRepository {
   func events() -> [Event]
-  func newEvent(event: Event, providers: [CalendarProvider]) async throws -> Event
-  func updateEvent(event: Event, providers: [CalendarProvider]) async throws -> Event
-  func deleteEvent(_ id: String, providers: [CalendarProvider]) async throws
+  func newEvent(event: Event, providers: [CalendarProvider]) throws -> Event
+  func updateEvent(event: Event, providers: [CalendarProvider]) throws -> Event
+  func deleteEvent(_ id: String, providers: [CalendarProvider]) throws
 
+  func verifyAuthorizationStatus(provider: CalendarProvider) async -> Bool
   func syncCalendar(provider: CalendarProvider) throws
   func unsyncCalendar(provider: CalendarProvider) throws
 }

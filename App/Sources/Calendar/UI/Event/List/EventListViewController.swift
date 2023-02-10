@@ -24,6 +24,7 @@ final class EventListViewController: BaseViewController {
   private var backgroundHeightConstraint: Constraint?
 
   var eventEditFlow: ((EventEditMode) -> Void)?
+  var settingFlow: (() -> Void)?
   var eventUseCase: EventUseCase?
   var events: [Event] = []
 
@@ -55,11 +56,17 @@ final class EventListViewController: BaseViewController {
       NSAttributedString.Key.font: UIFont.preferredFont(.regular, size: 16)
     ]
     navigationController?.navigationBar.barStyle = .black
-    if let naviBar = navigationController?.navigationBar {
-      naviBar.setBackgroundImage(UIImage(), for: .default)
-      naviBar.shadowImage = UIImage()
-      naviBar.backgroundColor = .clear
-      naviBar.isTranslucent = true
+    navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+    navigationController?.navigationBar.shadowImage = UIImage()
+    navigationController?.navigationBar.backgroundColor = .clear
+    navigationController?.navigationBar.isTranslucent = true
+
+    navigationItem.rightBarButtonItem = UIBarButtonItem().apply {
+      $0.image = "btn_setting".uiImage
+      $0.tintColor = .el_navi_setting
+      $0.style = .plain
+      $0.target = self
+      $0.action = #selector(settingWasTapped)
     }
 
     tableView = UITableView()
@@ -130,9 +137,9 @@ final class EventListViewController: BaseViewController {
     backgroundHeightConstraint?.update(offset: targetHeight)
   }
 
-//  @IBAction func settingWasTapped(_ sender: Any) {
-//    navigator?.show(.setting, transition: .present)
-//  }
+  @objc func settingWasTapped(_ sender: Any) {
+    settingFlow?()
+  }
 
   @objc func writingWasTouchedDown() {
     UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseOut) {
@@ -167,20 +174,20 @@ final class EventListViewController: BaseViewController {
   func reload() {
 //    events = eventUseCase?.getAll() ?? []
     events = [
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 7, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
-      Event(title: "어머니 생신", month: 10, day: 23),
+      Event(id: "1", title: "어머니 생신", month: 10, day: 23, syncCalendar: false),
+      Event(id: "2", title: "어머니 생신", month: 7, day: 23, syncCalendar: false)
+//      Event(title: "어머니 생신", month: 10, day: 23),
+//      Event(title: "어머니 생신", month: 10, day: 23),
+//      Event(title: "어머니 생신", month: 10, day: 23),
+//      Event(title: "어머니 생신", month: 10, day: 23),
+//      Event(title: "어머니 생신", month: 10, day: 23),
+//      Event(title: "어머니 생신", month: 10, day: 23),
+//      Event(title: "어머니 생신", month: 10, day: 23),
+//      Event(title: "어머니 생신", month: 10, day: 23),
+//      Event(title: "어머니 생신", month: 10, day: 23),
+//      Event(title: "어머니 생신", month: 10, day: 23),
+//      Event(title: "어머니 생신", month: 10, day: 23),
+//      Event(title: "어머니 생신", month: 10, day: 23),
     ]
     tableView.reloadData()
 
@@ -207,7 +214,6 @@ extension EventListViewController: UITableViewDataSource {
   }
 
   func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-
     let currentIndex = indexPath.row
     if currentIndex > lastLoadedIndex {
       let move = CGAffineTransform(translationX: 0, y: 30)

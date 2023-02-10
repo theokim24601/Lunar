@@ -7,16 +7,19 @@
 //
 
 protocol CalendarLocalDataSource {
-  func find(id: String) -> Event?
   func findAll() -> [Event]
+  func find(id: String) throws -> Event
   func insert(event: Event) throws -> Event
   func update(event: Event) throws -> Event
   func delete(id: String) throws-> Event
 }
 
 protocol CalendarRemoteDataSource {
-  func insert(event: Event, provider: CalendarProvider) throws
-  func update(old: Event, new: Event, provider: CalendarProvider) throws
-  func delete(event: Event, provider: CalendarProvider) throws
-  func deleteAll(provider: CalendarProvider)
+  var provider: CalendarProvider { get }
+
+  func verifyAuthorizationStatus() async -> Bool
+  func save(event: Event) throws
+  func update(old: Event, new: Event) throws
+  func remove(event: Event) throws
+  func removeAll() throws
 }

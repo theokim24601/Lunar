@@ -62,6 +62,9 @@ final class AppCoordinator {
     vc.eventEditFlow = { [weak self] eventEditMode in
       self?.showEventEditFlow(eventEditMode: eventEditMode)
     }
+    vc.settingFlow = { [weak self] in
+      self?.pushSettingFlow()
+    }
     navigationController.setViewControllers(
       [vc],
       animated: false
@@ -81,8 +84,8 @@ final class AppCoordinator {
   }
 
   private func pushSettingFlow() {
-    let vc = SettingViewController()
+    let vc = SettingsViewController()
 //    vc.eventUseCase = CompositionRoot.eventUseCase
-    window.rootViewController?.navigationController?.pushViewController(vc, animated: true)
+    navigationController.pushViewController(vc, animated: true)
   }
 }

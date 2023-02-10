@@ -19,15 +19,15 @@ enum EventEditMode: Equatable {
     case .edit(let event): return event.title
     }
   }
-
-  var eventDate: Date {
-    switch self {
-    case .new: return Date()
-    case .edit(let event): return event.date ?? Date()
-    }
-  }
 }
 
+struct EventForm {
+  var id: String?
+  var title: String?
+  var month: Int?
+  var day: Int?
+  var syncCalendar: Bool = false
+}
 
 final class EventEditViewController: BaseViewController, UITextFieldDelegate {
 
@@ -66,10 +66,14 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
 //  var eventUseCase: EventUseCase?
 //
   var mode: EventEditMode = .new
-  lazy var current: Event = {
-    var newEvent = Event()
+  lazy var current: EventForm = {
+    var newEvent = EventForm()
     if case .edit(let event) = mode {
-      newEvent = event.copy()
+      newEvent.id = event.id
+      newEvent.title = event.title
+      newEvent.month = event.lunarMonth
+      newEvent.day = event.lunarDay
+      newEvent.syncCalendar = event.syncCalendar
     }
     return newEvent
   }()
@@ -202,12 +206,12 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         stackView.addArrangedSubview($0)
       }
 
-      lunarDateForm = DateFormView(short: true, editable: true, calendar: .chinese, year: nil, month: current.lunarMonth, day: current.lunarDay).apply {
+      lunarDateForm = DateFormView(short: true, editable: true, calendar: .chinese, year: nil, month: current.month, day: current.day).apply {
         $0.completion = { [weak self] month, day in
-          self?.current.lunarMonth = month
-          self?.current.lunarDay = day
+          self?.current.month = month
+          self?.current.day = day
 
-          if let date = self?.current.toNearestFutureIncludingToday() {
+          if let date = CalendarUtil.nearestFutureSolarIncludingToday(month: self?.current.month, day: self?.current.day) {
             self?.solarDateForm.updateDate(year: date.year, month: date.month, day: date.day)
           }
         }
@@ -233,7 +237,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
       }
 
       var y, m, d: Int?
-      if let date = current.toNearestFutureIncludingToday() {
+      if let date = CalendarUtil.nearestFutureSolarIncludingToday(month: current.month, day: current.day) {
         let comps = Calendar.gregorian.dateComponents([.year, .month, .day], from: date)
         y = comps.year
         m = comps.month
@@ -305,9 +309,9 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         $0.setTitle("삭제", for: .normal)
         $0.setTitleColor(.warnColor1, for: .normal)
         $0.titleLabel?.font = .preferredFont(.medium, size: 14)
-        $0.borderColor = .warnColor1
-        $0.borderWidth = 1
-        $0.cornerRadius = cornerRadius
+        $0.layer.borderColor = UIColor.warnColor1.cgColor
+        $0.layer.borderWidth = 1
+        $0.layer.cornerRadius = cornerRadius
         stackView.addArrangedSubview($0)
       }
 
@@ -316,7 +320,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         $0.setTitle("수정", for: .normal)
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = .preferredFont(.medium, size: 14)
-        $0.cornerRadius = cornerRadius
+        $0.layer.cornerRadius = cornerRadius
         stackView.addArrangedSubview($0)
       }
 
@@ -325,7 +329,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         $0.setTitle("추가", for: .normal)
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = .preferredFont(.medium, size: 14)
-        $0.cornerRadius = cornerRadius
+        $0.layer.cornerRadius = cornerRadius
         $0.isHidden = true
         stackView.addArrangedSubview($0)
       }
@@ -802,7 +806,7 @@ extension EventEditViewController {
 
       let dateComps = DateComponents(
         calendar: .current,
-        year: Date.currentYear,
+        year: Date.current.year,
         month: m,
         day: d
       )

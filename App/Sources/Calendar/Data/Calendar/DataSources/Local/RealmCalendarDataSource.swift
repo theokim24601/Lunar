@@ -9,57 +9,57 @@
 import RealmSwift
 
 final class RealmCalendarDataSource: CalendarLocalDataSource {
-
-  func selectEvents() -> [RealmEvent] {
+  func findAll() -> [Event] {
     let realm = try! Realm()
-    let events = realm.objects(RealmEvent.self)
-    return events.filter { _ in true }
+    return realm.objects(RealmEvent.self)
+      .map { $0.toEntity() }
   }
 
-  func selectEvent(id: String) -> RealmEvent? {
+  func find(id: String) throws -> Event {
     let realm = try! Realm()
-    return realm.object(ofType: RealmEvent.self, forPrimaryKey: id)
+    guard let event = realm.object(ofType: RealmEvent.self, forPrimaryKey: id) else {
+      throw CalendarError.eventNotExistsInCalendar
+    }
+    return event.toEntity()
   }
 
-  func insertEvent(event: RealmEvent, completion: (Result<RealmEvent, CalendarError>) -> Void) {
+  func insert(event: Event) throws -> Event {
+    let realm = try! Realm()
     do {
-      let realm = try! Realm()
-      try realm.write {
+      return try realm.write {
         let realmEvent = realm.create(RealmEvent.self, value: event, update: .all)
-        completion(.success(realmEvent))
+        return realmEvent.toEntity()
       }
     } catch {
-      completion(.failure(.eventNotAddedToCalendar))
+      throw CalendarError.eventNotAddedToCalendar
     }
   }
 
-  func updateEvent(event: RealmEvent, completion: (Result<RealmEvent, CalendarError>) -> Void) {
+  func update(event: Event) throws -> Event {
+    let realm = try! Realm()
     do {
-      let realm = try! Realm()
-      try realm.write {
+      return try realm.write {
         let realmEvent = realm.create(RealmEvent.self, value: event, update: .all)
-        completion(.success(realmEvent))
+        return realmEvent.toEntity()
       }
     } catch {
-      completion(.failure(.eventNotAddedToCalendar))
+      throw CalendarError.eventNotUpdatedToCalendar
     }
   }
 
-  func deleteEvent(id: String, completion: (Result<Bool, CalendarError>) -> Void) {
+  func delete(id: String) throws -> Event {
+    let realm = try! Realm()
     do {
-      let realm = try! Realm()
-      try realm.write {
-        guard
-          let event = realm.object(ofType: RealmEvent.self, forPrimaryKey: id)
-          else {
-            completion(.failure(.eventNotRemovedFromCalendar))
-            return
+      let realmEvent = try realm.write {
+        guard let realmEvent = realm.object(ofType: RealmEvent.self, forPrimaryKey: id) else {
+          throw CalendarError.eventNotExistsInCalendar
         }
-        realm.delete(event)
-        completion(.success(true))
+        return realmEvent
       }
+      realm.delete(realmEvent)
+      return realmEvent.toEntity()
     } catch {
-      completion(.failure(.eventNotRemovedFromCalendar))
+      throw CalendarError.eventNotRemovedFromCalendar
     }
   }
 }

@@ -26,19 +26,13 @@ final class SyncUseCase {
   }
 
   func updateSyncStatus(provider: CalendarProvider, sync: Bool) async -> Result<Void, CalendarError> {
-    switch provider {
-    case .apple:
-      let accessGranted = await verifyAuthorizationStatus()
-      if !accessGranted {
-        return .failure(.calendarAccessDeniedOrRestricted)
-      }
-    default:
-      break
-    }
-
     let providerSettings = CalendarProviderSetting(provider: provider, sync: sync)
     let result = settingRepository.updateProviderSetting(setting: providerSettings)
     if result {
+      let accessGranted = await calendarRepository.verifyAuthorizationStatus(provider: provider)
+      if !accessGranted {
+        return .failure(.calendarAccessDeniedOrRestricted)
+      }
       do {
         if sync {
           try calendarRepository.syncCalendar(provider: provider)
@@ -51,22 +45,6 @@ final class SyncUseCase {
       }
     } else {
       return .failure(.calendarSyncFailedInLocal)
-    }
-  }
-
-  private func verifyAuthorizationStatus() async -> Bool {
-    switch EKEventStore.authorizationStatus(for: .event) {
-    case .authorized:
-      return true
-    case .notDetermined:
-      let accessGranted = try? await EKEventStore().requestAccess(to: .event)
-      if accessGranted == true {
-        return true
-      } else {
-        return false
-      }
-    default:
-      return false
     }
   }
 }

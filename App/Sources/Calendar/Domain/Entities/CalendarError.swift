@@ -7,13 +7,23 @@
 //
 
 enum CalendarError: Error {
-  case calendarSyncFailedInLocal
-  case calendarRetrieveFailed
+  // MARK: - Repository
+  case eventIdNotExists
 
+  // MARK: - DataSource
   case eventNotExistsInCalendar
   case eventNotAddedToCalendar
+  case eventNotUpdatedToCalendar
   case eventNotRemovedFromCalendar
-  case eventRemoveFailed
+  case failedToSaveEvent
+  case failedToLoadCalendar
+  case failedToConvertSolarDate
+  case failedToRemoveEvent
+  case failedToRemoveCalendar
   case eventAlreadyExistsInCalendar
+
+  case someCalendarPermissionDenied(providers: [CalendarProvider])
+
+  case calendarSyncFailedInLocal
   case calendarAccessDeniedOrRestricted
 }
