@@ -2,22 +2,21 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "ic_calendar.png",
       "scale" : "1x"
     },
     {
+      "filename" : "t1l_ic_cloud_disable@2x.png",
       "idiom" : "universal",
-      "filename" : "ic_calendar@2.0x.png",
       "scale" : "2x"
     },
     {
+      "filename" : "t1l_ic_cloud_disable@3x.png",
       "idiom" : "universal",
-      "filename" : "ic_calendar@3.0x.png",
       "scale" : "3x"
     }
   ],
   "info" : {
-    "version" : 1,
-    "author" : "xcode"
+    "author" : "xcode",
+    "version" : 1
   }
 }

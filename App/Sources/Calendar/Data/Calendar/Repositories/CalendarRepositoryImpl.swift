@@ -22,9 +22,11 @@ final class CalendarRepositoryImpl: CalendarRepository {
   func newEvent(event: Event, providers: [CalendarProvider]) throws -> Event {
     let newEvent = try local.insert(event: event)
 
-    for provider in providers {
-      let remoteDataSource = findDataSource(provider: provider)
-      try remoteDataSource?.save(event: newEvent)
+    if event.syncCalendar {
+      for provider in providers {
+        let remoteDataSource = findDataSource(provider: provider)
+        try remoteDataSource?.save(event: newEvent)
+      }
     }
     return newEvent
   }
@@ -36,9 +38,16 @@ final class CalendarRepositoryImpl: CalendarRepository {
 
     let old = try local.find(id: id)
     let newEvent = try local.update(event: event)
-    for provider in providers {
-      let remoteDataSource = findDataSource(provider: provider)
-      try remoteDataSource?.update(old: old, new: newEvent)
+    if event.syncCalendar {
+      for provider in providers {
+        let remoteDataSource = findDataSource(provider: provider)
+        try remoteDataSource?.update(old: old, new: newEvent)
+      }
+    } else if old.syncCalendar {
+      for provider in providers {
+        let remoteDataSource = findDataSource(provider: provider)
+        try remoteDataSource?.remove(event: old)
+      }
     }
     return newEvent
   }
@@ -52,6 +61,14 @@ final class CalendarRepositoryImpl: CalendarRepository {
     }
   }
 
+  func deleteAll(providers: [CalendarProvider]) throws {
+    for event in events() {
+      if let id = event.id {
+        try deleteEvent(id, providers: providers)
+      }
+    }
+  }
+
   func verifyAuthorizationStatus(provider: CalendarProvider) async -> Bool {
     let remoteDataSource = findDataSource(provider: provider)
     return await remoteDataSource?.verifyAuthorizationStatus() ?? false
@@ -61,8 +78,8 @@ final class CalendarRepositoryImpl: CalendarRepository {
     let events = local.findAll()
 
     let remoteDataSource = findDataSource(provider: provider)
-    for event in events {
-      try remoteDataSource?.save(event: event)
+    for event in events where event.syncCalendar {
+      try? remoteDataSource?.save(event: event)
     }
   }
 

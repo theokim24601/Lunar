@@ -44,12 +44,25 @@ final class EventUseCase {
     }
   }
 
-  func delete(_ id: String) async {
+  func delete(_ id: String) async -> Result<Void, Error> {
     let providers = await syncUpProviderStatus()
     do {
       try calendarRepository.deleteEvent(id, providers: providers)
+      return .success(())
     } catch (let error) {
       print("Failed to delete the event with error - \(error.localizedDescription)")
+      return .failure(error)
+    }
+  }
+
+  func deleteAll() async -> Result<Void, Error> {
+    let providers = await syncUpProviderStatus()
+    do {
+      try calendarRepository.deleteAll(providers: providers)
+      return .success(())
+    } catch (let error) {
+      print("Failed to delete the event with error - \(error.localizedDescription)")
+      return .failure(error)
     }
   }
 }

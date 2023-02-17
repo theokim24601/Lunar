@@ -11,6 +11,7 @@ import UIKit
 struct SettingCellForm {
   var icon: UIImage
   var title: String
+  var action: (() -> Void)?
 }
 
 final class SettingCell: BaseTableViewCell {
@@ -31,31 +32,35 @@ final class SettingCell: BaseTableViewCell {
     backgroundColor = .clear
     contentView.backgroundColor = .clear
 
-    containerView = UIView()
-    containerView.backgroundColor = .white
-    containerView.layer.cornerRadius = 16
-    containerView.layer.shadowColor = UIColor.grayEEE.cgColor
-    containerView.layer.shadowOpacity = 3.0
-    containerView.layer.shadowOffset = .zero
-    containerView.layer.shadowRadius = 6
-    contentView.addSubview(containerView)
+    containerView = UIView().apply {
+      $0.backgroundColor = .white
+      $0.layer.cornerRadius = 12
+      $0.layer.shadowColor = UIColor.grayEEE.cgColor
+      $0.layer.shadowOpacity = 3.0
+      $0.layer.shadowOffset = .zero
+      $0.layer.shadowRadius = 6
+      contentView.addSubview($0)
+    }
 
-    coreView = UIStackView()
-    coreView.axis = .horizontal
-    coreView.alignment = .fill
-    coreView.distribution = .fill
-    coreView.spacing = 12
-    containerView.addSubview(coreView)
+    coreView = UIStackView().apply {
+      $0.axis = .horizontal
+      $0.alignment = .fill
+      $0.distribution = .fill
+      $0.spacing = 12
+      containerView.addSubview($0)
+    }
 
-    iconView = UIImageView()
-    iconView.tintColor = .sc_icon
-    coreView.addArrangedSubview(iconView)
+    iconView = UIImageView().apply {
+      $0.tintColor = .sc_icon
+      coreView.addArrangedSubview($0)
+    }
 
-    titleLabel = UILabel()
-    titleLabel.numberOfLines = 0
-    titleLabel.font = .preferredFont(.regular, size: 16)
-    titleLabel.textColor = .sc_title
-    coreView.addArrangedSubview(titleLabel)
+    titleLabel = UILabel().apply {
+      $0.numberOfLines = 0
+      $0.font = .preferredFont(.regular, size: 16)
+      $0.textColor = .sc_title
+      coreView.addArrangedSubview($0)
+    }
   }
 
   override func setupConstraints() {

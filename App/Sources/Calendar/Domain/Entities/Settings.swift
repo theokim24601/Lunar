@@ -8,7 +8,9 @@
 
 import Foundation
 
-class Settings: NSObject, NSCoding {
+class Settings: NSObject, NSSecureCoding, NSCopying {
+  static var supportsSecureCoding: Bool = false
+
   var providerSettings: [CalendarProviderSetting] = []
 
   init(providerSettings: [CalendarProviderSetting]) {
@@ -26,6 +28,14 @@ class Settings: NSObject, NSCoding {
     coder.encode(providerSettings, forKey: "providerSettings")
   }
 
+  func supportNewProvider() {
+    for provider in CalendarProvider.allCases {
+      if !providerSettings.contains(where: { $0.provider == provider }) {
+        providerSettings.append(CalendarProviderSetting(provider: provider))
+      }
+    }
+  }
+
   static let `default`: Settings = {
     var providerSettings: [CalendarProviderSetting] = []
     for provider in CalendarProvider.allCases {
@@ -33,6 +43,12 @@ class Settings: NSObject, NSCoding {
     }
     return Settings(providerSettings: providerSettings)
   }()
+
+  func copy(with zone: NSZone? = nil) -> Any {
+    return Settings(
+      providerSettings: providerSettings.map { $0.copy() as! CalendarProviderSetting }
+    )
+  }
 }
 
 extension Settings {
@@ -42,5 +58,9 @@ extension Settings {
       providers.append(setting.provider)
     }
     return providers
+  }
+
+  var hasProvider: Bool {
+    return !onProviders.isEmpty
   }
 }

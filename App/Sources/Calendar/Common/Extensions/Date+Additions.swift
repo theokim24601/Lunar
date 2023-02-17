@@ -16,9 +16,17 @@ extension Date {
     return components.year ?? 0
   }
 
+  var yearString: String {
+    return "\(year)"
+  }
+
   var month: Int {
     let components = Calendar.current.dateComponents([.month], from: self)
     return components.month ?? 0
+  }
+
+  var monthString: String {
+    return "\(month)".leftPadding(toLength: CalendarUtil.monthLength, withPad: "0")
   }
 
   var day: Int {
@@ -26,14 +34,8 @@ extension Date {
     return components.day ?? 0
   }
 
-  func toNearestFutureIncludingToday() -> Self? {
-    var target = self
-    let aYear = DateComponents(year: 1)
-    while target.compare(Date.current) == .orderedAscending {
-      let nextYearTarget = Calendar.chinese.date(byAdding: aYear, to: target)!
-      target = nextYearTarget
-    }
-    return target
+  var dayString: String {
+    return "\(day)".leftPadding(toLength: CalendarUtil.dayLength, withPad: "0")
   }
 }
 

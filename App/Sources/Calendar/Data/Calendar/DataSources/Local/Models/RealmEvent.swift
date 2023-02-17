@@ -16,7 +16,9 @@ class RealmEvent: Object {
   @Persisted var day: Int
   @Persisted var syncCalendar: Bool = false
 
-  init(id: String?, title: String, month: Int, day: Int, syncCalendar: Bool) {
+  convenience init(id: String?, title: String, month: Int, day: Int, syncCalendar: Bool) {
+    self.init()
+    
     if let id {
       self.id = id
     }

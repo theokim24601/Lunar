@@ -27,7 +27,7 @@ final class RealmCalendarDataSource: CalendarLocalDataSource {
     let realm = try! Realm()
     do {
       return try realm.write {
-        let realmEvent = realm.create(RealmEvent.self, value: event, update: .all)
+        let realmEvent = realm.create(RealmEvent.self, value: RealmEvent(event: event), update: .all)
         return realmEvent.toEntity()
       }
     } catch {
@@ -38,9 +38,16 @@ final class RealmCalendarDataSource: CalendarLocalDataSource {
   func update(event: Event) throws -> Event {
     let realm = try! Realm()
     do {
+      let realmEvent = RealmEvent(event: event)
+      guard let originRealmEvent = realm.object(ofType: RealmEvent.self, forPrimaryKey: realmEvent.id) else {
+        throw CalendarError.eventNotExistsInCalendar
+      }
       return try realm.write {
-        let realmEvent = realm.create(RealmEvent.self, value: event, update: .all)
-        return realmEvent.toEntity()
+        originRealmEvent.title = event.title
+        originRealmEvent.month = event.lunarMonth
+        originRealmEvent.day = event.lunarDay
+        originRealmEvent.syncCalendar = event.syncCalendar
+        return originRealmEvent.toEntity()
       }
     } catch {
       throw CalendarError.eventNotUpdatedToCalendar
@@ -50,14 +57,14 @@ final class RealmCalendarDataSource: CalendarLocalDataSource {
   func delete(id: String) throws -> Event {
     let realm = try! Realm()
     do {
-      let realmEvent = try realm.write {
-        guard let realmEvent = realm.object(ofType: RealmEvent.self, forPrimaryKey: id) else {
-          throw CalendarError.eventNotExistsInCalendar
-        }
-        return realmEvent
+      guard let realmEvent = realm.object(ofType: RealmEvent.self, forPrimaryKey: id) else {
+        throw CalendarError.eventNotExistsInCalendar
       }
-      realm.delete(realmEvent)
-      return realmEvent.toEntity()
+      let event = realmEvent.toEntity()
+      try realm.write {
+        realm.delete(realmEvent)
+      }
+      return event
     } catch {
       throw CalendarError.eventNotRemovedFromCalendar
     }

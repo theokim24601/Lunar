@@ -32,7 +32,7 @@ final class EventCell: BaseTableViewCell {
 
     containerView = UIView()
     containerView.backgroundColor = .white
-    containerView.layer.cornerRadius = 28
+    containerView.layer.cornerRadius = 16
     containerView.layer.shadowColor = UIColor.grayEEE.cgColor
     containerView.layer.shadowOpacity = 3.0
     containerView.layer.shadowOffset = .zero

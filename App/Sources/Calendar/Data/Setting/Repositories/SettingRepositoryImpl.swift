@@ -44,10 +44,11 @@ private extension SettingRepositoryImpl {
   func loadSettings() -> Settings {
     guard
       let settingsData = try? keychain.getData(Key.settings),
-      let settings = try? NSKeyedUnarchiver.unarchivedObject(ofClass: Settings.self, from: settingsData)
+      let settings = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(settingsData) as? Settings
     else {
       return saveSettings(settings: Settings.default) ?? Settings.default
     }
+    settings.supportNewProvider()
     return settings
   }
 

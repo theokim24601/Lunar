@@ -112,6 +112,7 @@ extension Target {
         "UISupportedInterfaceOrientations": [
           "UIInterfaceOrientationPortrait"
         ],
+        "UIUserInterfaceStyle": "Light",
         "NSCalendarsUsageDescription": "기본 캘린더에 일정 등록을 위해 접근 권한이 필요합니다.",
         "UIAppFonts": [
           "SpoqaHanSansNeo-Bold.otf",

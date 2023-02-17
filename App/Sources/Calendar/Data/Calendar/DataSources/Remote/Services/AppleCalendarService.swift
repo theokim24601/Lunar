@@ -10,7 +10,7 @@ import EventKit
 
 final class AppleCalendarService: CalendarRemoteDataSource {
   private struct Key {
-    static let calendarDefaultTitle = "Lunar"
+    static let calendarDefaultTitle = "음력을 알려줘"
   }
 
   private(set) var provider: CalendarProvider = .apple

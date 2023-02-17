@@ -73,19 +73,33 @@ final class AppCoordinator {
   }
 
   private func showEventEditFlow(eventEditMode mode: EventEditMode) {
-    let vc = EventEditViewController()
-    vc.mode = mode
-    vc.modalPresentationStyle = .overFullScreen
-    vc.didEditFinish = { [weak self] in
+    let vc = EventEditViewController(
+      mode: mode,
+      eventUseCase: CompositionRoot.eventUseCase,
+      syncUseCase: CompositionRoot.syncUseCase
+    )
+    vc.didEditFinish = { [weak self] updated in
       self?.navigationController.dismiss(animated: false)
+
+      if updated, let listVC = self?.navigationController.children.first as? EventListViewController {
+        listVC.reload()
+      }
     }
-//    vc.eventUseCase = CompositionRoot.eventUseCase
     navigationController.present(vc, animated: false)
   }
 
   private func pushSettingFlow() {
     let vc = SettingsViewController()
-//    vc.eventUseCase = CompositionRoot.eventUseCase
+    vc.calendarSettingFlow = { [weak self] in
+      self?.showCalendarSyncView()
+    }
+    vc.eventUseCase = CompositionRoot.eventUseCase
+    vc.syncUseCase = CompositionRoot.syncUseCase
     navigationController.pushViewController(vc, animated: true)
+  }
+
+  private func showCalendarSyncView() {
+    let vc = CalendarSyncViewController(syncUseCase: CompositionRoot.syncUseCase)
+    navigationController.present(vc, animated: false)
   }
 }

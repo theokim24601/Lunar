@@ -8,7 +8,7 @@
 
 import Foundation
 
-class CalendarProviderSetting: NSObject, NSCoding {
+class CalendarProviderSetting: NSObject, NSCoding, NSCopying {
   var provider: CalendarProvider
   var sync: Bool
 
@@ -23,15 +23,18 @@ class CalendarProviderSetting: NSObject, NSCoding {
       return nil
     }
     self.provider = provider
-
-    guard let sync = coder.decodeObject(forKey: "sync") as? Bool else {
-      return nil
-    }
-    self.sync = sync
+    self.sync = coder.decodeBool(forKey: "sync")
   }
 
   func encode(with coder: NSCoder) {
     coder.encode(provider.rawValue, forKey: "providerString")
     coder.encode(sync, forKey: "sync")
+  }
+
+  func copy(with zone: NSZone? = nil) -> Any {
+    return CalendarProviderSetting(
+      provider: provider,
+      sync: sync
+    )
   }
 }

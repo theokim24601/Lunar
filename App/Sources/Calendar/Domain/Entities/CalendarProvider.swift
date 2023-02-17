@@ -10,12 +10,12 @@ import Foundation
 
 enum CalendarProvider: String, CaseIterable {
   case apple
-  case google
+//  case google
 
   var title: String {
     switch self {
     case .apple: return "Apple Calendar"
-    case .google: return "Google Calendar"
+//    case .google: return "Google Calendar"
     }
   }
 }

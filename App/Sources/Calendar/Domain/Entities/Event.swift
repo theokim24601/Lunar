@@ -9,14 +9,14 @@
 import Foundation
 import Scope
 
-class Event: Equatable, Comparable {
+class Event: Identifiable, Equatable, Comparable {
   var id: String?
   var title: String
   var lunarMonth: Int
   var lunarDay: Int
   var syncCalendar: Bool
 
-  init(id: String?, title: String, month: Int, day: Int, syncCalendar: Bool) {
+  init(id: String? = nil, title: String, month: Int, day: Int, syncCalendar: Bool) {
     self.id = id
     self.title = title
     self.lunarMonth = month
@@ -44,20 +44,5 @@ class Event: Equatable, Comparable {
     guard let date1 = CalendarUtil.nearestFutureSolarIncludingToday(month: lhs.lunarMonth, day: lhs.lunarDay) else { return true }
     guard let date2 = CalendarUtil.nearestFutureSolarIncludingToday(month: rhs.lunarMonth, day: rhs.lunarDay) else { return true }
     return date2.compare(date1) == .orderedDescending
-  }
-}
-
-class CalendarUtil {
-  static func nearestFutureSolarIncludingToday(month: Int?, day: Int?) -> Date? {
-    let dateComps = DateComponents(month: month, day: day)
-    guard var target = Calendar.chinese.date(from: dateComps) else {
-      return nil
-    }
-    let aYear = DateComponents(year: 1)
-    while target.compare(Date.current) == .orderedAscending {
-      let nextYearTarget = Calendar.chinese.date(byAdding: aYear, to: target)!
-      target = nextYearTarget
-    }
-    return target
   }
 }

@@ -11,6 +11,7 @@ protocol CalendarRepository {
   func newEvent(event: Event, providers: [CalendarProvider]) throws -> Event
   func updateEvent(event: Event, providers: [CalendarProvider]) throws -> Event
   func deleteEvent(_ id: String, providers: [CalendarProvider]) throws
+  func deleteAll(providers: [CalendarProvider]) throws
 
   func verifyAuthorizationStatus(provider: CalendarProvider) async -> Bool
   func syncCalendar(provider: CalendarProvider) throws

@@ -26,6 +26,9 @@ public extension UIColor {
   static let ec_lunarLabel = t1l_t1
   static let ec_gregorianLabel = t1l_t1
 
+  // MARK: - PlaceholdCell
+  static let ph_title = t1l_t3
+
   // MARK: - Event Edit
   static let ee_title = t1l_t1
   static let ee_dateLabel = grayAAA
@@ -33,9 +36,13 @@ public extension UIColor {
   static let ee_gregorianLabel = t1l_t1
   static let ee_detail = grayAAA
   static let ee_calendarImgTint = t1l_f5
+  static let ee_calendarImgTint_disable = t1l_f3
   static let ee_calendarReg = t1l_t1
+  static let ee_calendarReg_disable = t1l_t4
   static let ee_calendarSwitchTint = t1l_f1
+  static let ee_sync_warn = warnColor1
   static let ee_edit = t1l_f1
+  static let ee_edit_disable = t1l_f4
   static let ee_date_editable = t1l_t1
   static let ee_date_disable = t1l_t4
   static let ee_date_slash = t1l_t4

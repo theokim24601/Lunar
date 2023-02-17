@@ -21,142 +21,56 @@ enum EventEditMode: Equatable {
   }
 }
 
-struct EventForm {
-  var id: String?
-  var title: String?
-  var month: Int?
-  var day: Int?
-  var syncCalendar: Bool = false
-}
-
-final class EventEditViewController: BaseViewController, UITextFieldDelegate {
-
-  private let maxDimmedAlpha: CGFloat = 0.6
-  private var dimmedView: UIView!
-
-  private let containerDefaultHeight: CGFloat = 240
-  private var containerView: UIView!
+final class EventEditViewController: BottomSheetView, UITextFieldDelegate {
 
   private var contentView: UIStackView!
-  private var dismissView: DismissView!
-//  private var modeLabel: UILabel!
-
-//  private var titleContainerView: UIView!
   private var titleField: UITextField!
   private var lunarDateForm: DateFormView!
   private var solarDateForm: DateFormView!
-
-//  private var yearContainerView: UIView!
-//  private var yearField: UITextField!
-
-//  private var monthContainerView: UIView!
-//  private var monthField: UITextField!
-
-//  private var dayContainerView: UIView!
-//  private var dayField: UITextField!
   private var editContainerView: UIStackView!
+  private var calendarSyncSwitch: UISwitch!
   private var createButton: UIButton!
   private var editButton: UIButton!
   private var deleteButton: UIButton!
 
+  var mode: EventEditMode
+  var eventUseCase: EventUseCase
+  var current: EventForm = EventForm()
+  var didEditFinish: ((Bool) -> Void)?
 
-//  var containerViewBottomConstraint: Constraint?
-//  var keyboardPaddingHeightConstraint: Constraint?
+  var defaultSyncValue: Bool
 
-//  var eventUseCase: EventUseCase?
-//
-  var mode: EventEditMode = .new
-  lazy var current: EventForm = {
-    var newEvent = EventForm()
+  init(mode: EventEditMode, eventUseCase: EventUseCase, syncUseCase: SyncUseCase) {
+    self.mode = mode
+    defaultSyncValue = syncUseCase.currentSettings().hasProvider
+    current.syncCalendar = defaultSyncValue
     if case .edit(let event) = mode {
-      newEvent.id = event.id
-      newEvent.title = event.title
-      newEvent.month = event.lunarMonth
-      newEvent.day = event.lunarDay
-      newEvent.syncCalendar = event.syncCalendar
+      current.id = event.id
+      current.title = event.title
+      current.month = event.lunarMonth
+      current.day = event.lunarDay
+      current.syncCalendar = event.syncCalendar
     }
-    return newEvent
-  }()
-//  var current = Date() {
-//    didSet {
-//      yearField.text = "\(Calendar.gregorian.component(.year, from: current))"
-//      monthField.text = "\(Calendar.chinese.component(.month, from: current))"
-//      dayField.text = "\(Calendar.chinese.component(.day, from: current))"
-//      datePicker.date = current
-//    }
-//  }
-//
-  var didEditFinish: (() -> Void)?
-//
-//  private lazy var toolbar: UIToolbar = {
-//    let toolbar = UIToolbar()
-//    toolbar.barStyle = .default
-//    toolbar.isTranslucent = true
-//    toolbar.tintColor = UIColor(red: 92/255, green: 216/255, blue: 255/255, alpha: 1)
-//    toolbar.sizeToFit()
-//
-//    let doneButton = UIBarButtonItem(
-//      title: "Done",
-//      style: .plain,
-//      target: self,
-//      action: #selector(endUpdateDate)
-//    )
-//    let spaceButton = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-//    let cancelButton = UIBarButtonItem(
-//      title: "Cancel",
-//      style: .plain,
-//      target: self,
-//      action: #selector(cancelUpdateDate)
-//    )
-//    toolbar.setItems([cancelButton, spaceButton, doneButton], animated: false)
-//    toolbar.isUserInteractionEnabled = true
-//    return toolbar
-//  }()
-//
-//  private lazy var datePicker: UIDatePicker = {
-//    let datePicker = UIDatePicker()
-//    datePicker.datePickerMode = .date
-//    datePicker.timeZone = .current
-//    datePicker.calendar = .chinese
-//    return datePicker
-//  }()
+    self.eventUseCase = eventUseCase
 
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    registerForKeyboardNotifications()
+    super.init(nibName: nil, bundle: nil)
   }
 
-  private func registerForKeyboardNotifications() {
-    NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-    NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
-  }
-
-  private func unregisterForKeyboardNotifications() {
-    NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillShowNotification, object: nil)
-    NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardWillHideNotification, object: nil)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
   }
 
   override func setupViews() {
-    dimmedView = UIView()
-    dimmedView.backgroundColor = .black
-    dimmedView.alpha = maxDimmedAlpha
-    dimmedView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dimmedWasTapped)))
-    view.addSubview(dimmedView)
+    super.setupViews()
+    contentView = UIStackView().apply {
+      $0.axis = .vertical
+      $0.alignment = .fill
+      $0.distribution = .fill
+      $0.backgroundColor = .white
+      containerView.addSubview($0)
+    }
 
-    containerView = UIView()
-    containerView.backgroundColor = .white
-    containerView.layer.cornerRadius = 16
-    containerView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-    view.addSubview(containerView)
-
-    contentView = UIStackView()
-    contentView.axis = .vertical
-    contentView.alignment = .fill
-    contentView.distribution = .fill
-    contentView.backgroundColor = .white
-    containerView.addSubview(contentView)
-
-    DismissView().apply {
+    BottomSheetHandleBar().apply {
       $0.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(dimmedWasTapped)))
       contentView.addArrangedSubview($0)
     }
@@ -175,6 +89,7 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
       $0.enablesReturnKeyAutomatically = true
       $0.returnKeyType = .next
       $0.delegate = self
+      $0.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
       contentView.addArrangedSubview($0)
     }
 
@@ -206,14 +121,30 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         stackView.addArrangedSubview($0)
       }
 
-      lunarDateForm = DateFormView(short: true, editable: true, calendar: .chinese, year: nil, month: current.month, day: current.day).apply {
-        $0.completion = { [weak self] month, day in
-          self?.current.month = month
-          self?.current.day = day
-
-          if let date = CalendarUtil.nearestFutureSolarIncludingToday(month: self?.current.month, day: self?.current.day) {
-            self?.solarDateForm.updateDate(year: date.year, month: date.month, day: date.day)
+      lunarDateForm = DateFormView(
+        short: true,
+        editable: true,
+        calendar: .chinese,
+        year: nil,
+        month: current.monthString,
+        day: current.dayString
+      ).apply {
+        $0.dateChanged = { [weak self] month, day in
+          guard let self else { return }
+          guard CalendarUtil.verifyDate(month: month, day: day) else {
+            self.disableButtons()
+            return
           }
+
+          self.current.month = Int(month)
+          self.current.day = Int(day)
+
+          if let date = CalendarUtil.nearestFutureSolarIncludingToday(month: self.current.month, day: self.current.day) {
+            self.solarDateForm.updateDate(year: date.yearString, month: date.monthString, day: date.dayString)
+          } else {
+            self.solarDateForm.updateDate(year: nil, month: nil, day: nil)
+          }
+          self.validateForm()
         }
         stackView.addArrangedSubview($0)
       }
@@ -236,14 +167,21 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         stackView.addArrangedSubview($0)
       }
 
-      var y, m, d: Int?
-      if let date = CalendarUtil.nearestFutureSolarIncludingToday(month: current.month, day: current.day) {
-        let comps = Calendar.gregorian.dateComponents([.year, .month, .day], from: date)
-        y = comps.year
-        m = comps.month
-        d = comps.day
+      var year, month, day: String?
+      if case .edit = mode {
+        let date = CalendarUtil.nearestFutureSolarIncludingToday(month: current.month, day: current.day)
+        year = date?.yearString
+        month = date?.monthString
+        day = date?.dayString
       }
-      solarDateForm = DateFormView(short: false, editable: false, calendar: .gregorian, year: y, month: m, day: d).apply {
+      solarDateForm = DateFormView(
+        short: false,
+        editable: false,
+        calendar: .gregorian,
+        year: year,
+        month: month,
+        day: day
+      ).apply {
         stackView.addArrangedSubview($0)
       }
     }
@@ -271,23 +209,45 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
       contentView.addArrangedSubview(stackView)
 
       UIImageView().apply {
-        $0.image = "t1l_ic_cloud".uiImage
-        $0.tintColor = .ee_calendarImgTint
+        if defaultSyncValue {
+          $0.image = "t1l_ic_cloud".uiImage
+        } else {
+          $0.image = "t1l_ic_cloud_disable".uiImage
+        }
         $0.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         stackView.addArrangedSubview($0)
       }
 
       UILabel().apply {
         $0.font = .preferredFont(.medium, size: 16)
-        $0.textColor = .ee_calendarReg
         $0.text = "캘린더에 등록"
+        if defaultSyncValue {
+          $0.textColor = .ee_calendarReg
+        } else {
+          $0.textColor = .ee_calendarReg_disable
+        }
         stackView.addArrangedSubview($0)
       }
 
-      UISwitch().apply {
+      calendarSyncSwitch = UISwitch().apply {
         $0.onTintColor = .ee_calendarSwitchTint
-        $0.isOn = true
+        if defaultSyncValue {
+          $0.isOn = current.syncCalendar
+        } else {
+          $0.isOn = false
+          $0.isEnabled = false
+        }
+        $0.addTarget(self, action: #selector(syncWasChanged(_:)), for: .valueChanged)
         stackView.addArrangedSubview($0)
+      }
+    }
+
+    if !defaultSyncValue {
+      UILabel().apply {
+        $0.text = "설정에서 캘린더를 먼저 연동해주세요."
+        $0.font = .preferredFont(.light, size: 11)
+        $0.textColor = .ee_sync_warn
+        contentView.addArrangedSubview($0)
       }
     }
 
@@ -312,6 +272,8 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         $0.layer.borderColor = UIColor.warnColor1.cgColor
         $0.layer.borderWidth = 1
         $0.layer.cornerRadius = cornerRadius
+        $0.isHidden = true
+        $0.addTarget(self, action: #selector(deleteWasTapped(_:)), for: .touchUpInside)
         stackView.addArrangedSubview($0)
       }
 
@@ -321,6 +283,8 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         $0.setTitleColor(.white, for: .normal)
         $0.titleLabel?.font = .preferredFont(.medium, size: 14)
         $0.layer.cornerRadius = cornerRadius
+        $0.isHidden = true
+        $0.addTarget(self, action: #selector(editWasTapped(_:)), for: .touchUpInside)
         stackView.addArrangedSubview($0)
       }
 
@@ -331,67 +295,20 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
         $0.titleLabel?.font = .preferredFont(.medium, size: 14)
         $0.layer.cornerRadius = cornerRadius
         $0.isHidden = true
+        $0.addTarget(self, action: #selector(createWasTapped(_:)), for: .touchUpInside)
         stackView.addArrangedSubview($0)
       }
-
-      if case .edit = mode {
-        deleteButton.isHidden = false
-        editButton.isHidden = false
-      } else {
-        deleteButton.isHidden = true
-        editButton.isHidden = true
-      }
-      createButton.isHidden = true
     }
 
     SizedView(height: 28).apply {
       contentView.addArrangedSubview($0)
     }
 
-//    containerView.layer.borderColor = UIColor(named: "border")?.cgColor
-//    containerView.backgroundColor = UIColor(named: "background")
-//
-//    let titleColor = UIColor(named: "title")?.cgColor
-//    titleContainerView.layer.borderColor = titleColor
-//
-//    yearContainerView.layer.borderColor = titleColor
-//    yearField.inputAccessoryView = toolbar
-//    yearField.inputView = datePicker
-//
-//    monthContainerView.layer.borderColor = titleColor
-//    monthField.inputAccessoryView = toolbar
-//    monthField.inputView = datePicker
-//
-//    dayContainerView.layer.borderColor = titleColor
-//    dayField.inputAccessoryView = toolbar
-//    dayField.inputView = datePicker
-//
-//    modeLabel.text = mode.modeTitle
-//    titleField.text = mode.eventTitle
-//    current = mode.startDate
-//    switch mode {
-//    case .new:
-////      analytics.log(.create_view)
-//      editButton.isHidden = true
-//      deleteButton.isHidden = true
-//      enableButton(button: createButton, enable: false)
-//    case .edit(let event):
-////      analytics.log(.edit_view(event))
-//      createButton.isHidden = true
-//      enableButton(button: editButton, enable: false)
-//    }
+    validateForm()
   }
 
   override func setupConstraints() {
-    dimmedView.snp.makeConstraints {
-      $0.edges.equalToSuperview()
-    }
-
-    containerView.snp.makeConstraints {
-      $0.leading.trailing.equalToSuperview()
-      $0.bottom.equalToSuperview().offset(containerDefaultHeight)
-    }
-
+    super.setupConstraints()
     contentView.snp.makeConstraints {
       $0.leading.trailing.equalToSuperview().inset(16)
       $0.top.bottom.equalToSuperview()
@@ -412,118 +329,16 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
     }
   }
 
-  override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    animateShowDimmedView()
-    animatePresentContainer()
+  @objc func textFieldDidChange(_ sender: Any) {
+    current.title = titleField.text
+    validateForm()
   }
 
-  override func viewWillDisappear(_ animated: Bool) {
-    super.viewWillDisappear(animated)
-    unregisterForKeyboardNotifications()
+  @objc func syncWasChanged(_ sendor: Any) {
+    current.syncCalendar = calendarSyncSwitch.isOn
+    validateForm()
   }
 
-  @objc func keyboardWillShow(_ notification: NSNotification) {
-    if let userInfo = notification.userInfo,
-       let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double,
-       let keyboardRect = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-      UIView.animate(withDuration: duration, delay: 0, animations: {
-        self.containerView.transform = CGAffineTransform(translationX: 0, y: -keyboardRect.height)
-      })
-    }
-  }
-
-  @objc func keyboardWillHide(_ notification: NSNotification) {
-    containerView.transform = .identity
-  }
-
-  override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-    view.endEditing(true)
-  }
-
-  func animateShowDimmedView() {
-    dimmedView.alpha = 0
-    UIView.animate(withDuration: 0.4) {
-      self.dimmedView.alpha = self.maxDimmedAlpha
-    }
-  }
-
-  func animatePresentContainer() {
-    containerView.snp.updateConstraints {
-      $0.bottom.equalToSuperview()
-    }
-    UIView.animate(withDuration: 0.3) {
-      self.view.layoutIfNeeded()
-    }
-  }
-
-  @objc func dimmedWasTapped() {
-    animateDismissView()
-  }
-
-  func animateDismissView() {
-    containerView.snp.updateConstraints {
-      $0.bottom.equalToSuperview().offset(contentView.frame.height)
-    }
-    UIView.animate(withDuration: 0.3) {
-      self.view.layoutIfNeeded()
-    }
-
-    dimmedView.alpha = maxDimmedAlpha
-    UIView.animate(withDuration: 0.4) {
-      self.dimmedView.alpha = 0
-    } completion: { _ in
-      self.dismiss(animated: false)
-    }
-  }
-
-//  private func switchBasedNextTextField(_ textField: UITextField) {
-//      switch textField {
-//      case self.username:
-//          self.firstname.becomeFirstResponder()
-//      case self.firstname:
-//          self.lastname.becomeFirstResponder()
-//      case self.lastname:
-//          self.email.becomeFirstResponder()
-//      default:
-//          self.email.resignFirstResponder()
-//      }
-//  }
-
-//  @IBAction func closingWasTapped(_ sender: Any) {
-////    navigator?.pop(isModal: true)
-//  }
-//
-//  @IBAction func createWasTapped(_ sender: Any) {
-//    guard let eventTitle = titleField.text else { return }
-//    let event = Event(title: eventTitle, date: current)
-//    eventUseCase?.new(event)
-//    didEditFinish?()
-////    analytics.log(.event_create(event))
-////    navigator?.pop(isModal: true)
-//    Vibration.success.vibrate()
-//  }
-//
-//  @IBAction func editWasTapped(_ sender: Any) {
-//    guard let eventTitle = titleField.text else { return }
-//    guard case let .edit(event) = mode else { return }
-//    event.title = eventTitle
-//    event.date = current
-//    eventUseCase?.update(event)
-//    didEditFinish?()
-////    analytics.log(.event_edit)
-////    navigator?.pop(isModal: true)
-//    Vibration.success.vibrate()
-//  }
-//
-//  @IBAction func deleteWasTapped(_ sender: Any) {
-//    showDeleteAlert()
-//  }
-//
-//  @IBAction func textFieldDidChange(_ sender: Any) {
-//    validate(text: titleField.text, date: current)
-//  }
-//
   func textFieldShouldReturn(_ textField: UITextField) -> Bool {
     if lunarDateForm.becomeFirstResponder() {
       return true
@@ -531,297 +346,115 @@ final class EventEditViewController: BaseViewController, UITextFieldDelegate {
       return titleField.resignFirstResponder()
     }
   }
-//
-//  @objc func endUpdateDate() {
-//    current = datePicker.date
-//    validate(text: titleField.text, date: current)
-//    resignDateFields()
-//  }
-//
-//  @objc func cancelUpdateDate() {
-//    resignDateFields()
-//  }
-//
-//  func resignDateFields() {
-//    yearField.resignFirstResponder()
-//    monthField.resignFirstResponder()
-//    dayField.resignFirstResponder()
-//  }
-//
-//  func validate(text currentText: String?, date: Date) {
-//    switch mode {
-//    case .new:
-//      let enable = currentText?.isEmpty == false
-//      enableButton(button: createButton, enable: enable)
-//    case .edit(let event):
-//      let enable = currentText?.isEmpty == false
-//        && (date != event.date || currentText != event.title)
-//      enableButton(button: editButton, enable: enable)
-//    }
-//  }
-//
-//  func enableButton(button: UIButton, enable: Bool) {
-//    if enable {
-//      let color = UIColor(named: "title")
-//      button.isEnabled = true
-//      button.setTitleColor(color, for: .normal)
-//      button.layer.borderColor = color?.cgColor
-//    } else {
-//      let color = UIColor(named: "title_disable")
-//      button.isEnabled = false
-//      button.setTitleColor(color, for: .normal)
-//      button.layer.borderColor = color?.cgColor
-//    }
-//  }
-//
-//  func deleteEvent() {
-//    guard case let .edit(event) = mode else { return }
-//    guard let id = event.id else { return }
-//    eventUseCase?.delete(id)
-//    didEditFinish?()
-////    analytics.log(.event_delete)
-////    navigator?.pop(isModal: true)
-//  }
-//
-//  func showDeleteAlert() {
-//    let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { _ in
-//      self.deleteEvent()
-//    }
-//    let cancelAction = UIAlertAction(title: "취소", style: .cancel)
-//    let alert = UIAlertController(title: "일정 삭제", message: "진짜 지울꺼예요?ㅠ", preferredStyle: .alert)
-//    alert.addAction(deleteAction)
-//    alert.addAction(cancelAction)
-//    DispatchQueue.main.async {
-//      self.present(alert, animated: true)
-//    }
-//  }
-}
 
-extension EventEditViewController {
-  class DismissView: BaseView {
-    private var imageView: UIImageView!
+  func validateForm() {
+    let title = current.title ?? ""
+    let month = current.month
+    let day = current.day
+    let syncCalendar = current.syncCalendar
+    let isValidDate = CalendarUtil.verifyDate(month: current.monthString, day: current.dayString)
 
-    override func setupViews() {
-      imageView = UIImageView()
-      imageView.image = "ic_bottom_dismiss".uiImage
-      backgroundColor = .clear
-      addSubview(imageView)
-    }
+    switch mode {
+    case .new:
+      if !title.isEmpty, isValidDate {
+        enableButtons()
+      } else {
+        disableButtons()
+      }
+    case .edit(let event):
+      let isSameAsOrigin = event.title == title
+      && event.lunarMonth == month
+      && event.lunarDay == day
+      && event.syncCalendar == syncCalendar
 
-    override func setupConstraints() {
-      imageView.snp.makeConstraints {
-        $0.top.bottom.centerX.equalToSuperview()
+      if isSameAsOrigin || title.isEmpty || !isValidDate {
+        disableButtons()
+      } else {
+        enableButtons()
       }
     }
   }
 
-  class DateFormView: BaseView, UITextFieldDelegate {
-    private let yearLength = 4
-    private let monthLength = 2
-    private let dayLength = 2
-
-    private var stackView: UIStackView!
-    private var yearTextField: UITextField!
-    private var ymDivider: UILabel!
-    private var monthTextField: UITextField!
-    private var mdDivider: UILabel!
-    private var dayTextField: UITextField!
-
-    var short: Bool
-    var editable: Bool
-    var calendar: Calendar
-    var year: Int?
-    var month: Int?
-    var day: Int?
-    var completion: ((Int, Int) -> Void)?
-    init(short: Bool, editable: Bool, calendar: Calendar, year: Int?, month: Int?, day: Int?) {
-      self.short = short
-      self.editable = editable
-      self.calendar = calendar
-      self.year = year
-      self.month = month
-      self.day = day
-      super.init(frame: .zero)
+  func enableButtons() {
+    switch mode {
+    case .new:
+      createButton.isHidden = false
+    case .edit:
+      editButton.backgroundColor = .ee_edit
+      editButton.isEnabled = true
+      editButton.isHidden = false
+      deleteButton.isHidden = false
     }
+  }
 
-    required init?(coder: NSCoder) {
-      fatalError("init(coder:) has not been implemented")
+  func disableButtons() {
+    switch mode {
+    case .new:
+      createButton.isHidden = true
+    case .edit:
+      editButton.backgroundColor = .ee_edit_disable
+      editButton.isEnabled = false
+      editButton.isHidden = false
+      deleteButton.isHidden = false
     }
+  }
 
-    override func becomeFirstResponder() -> Bool {
-      if !short && yearTextField.text?.count ?? 0 < yearLength {
-        return yearTextField.becomeFirstResponder()
-      } else if monthTextField.text?.count ?? 0 < monthLength {
-        return monthTextField.becomeFirstResponder()
-      } else if dayTextField.text?.count ?? 0 < dayLength {
-        return dayTextField.becomeFirstResponder()
-      }
-      return false
-    }
-
-    override func setupViews() {
-      stackView = UIStackView().apply {
-        $0.axis = .horizontal
-        $0.alignment = .fill
-        $0.distribution = .fill
-        $0.spacing = 4
-        addSubview($0)
-      }
-
-      if !short {
-        yearTextField = UITextField().apply {
-          $0.placeholder = "YYYY"
-          $0.font = .preferredFont(.medium, size: 14)
-          $0.textColor = editable ? .ee_date_editable : .ee_date_disable
-          $0.isEnabled = editable
-          $0.keyboardType = .numberPad
-          $0.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-          $0.delegate = self
-          if let year {
-            $0.text = "\(year)"
+  @objc func createWasTapped(_ sender: Any) {
+    Task {
+      if let title = current.title,
+         let month = current.month,
+         let day = current.day {
+        let syncCalendar = current.syncCalendar
+        let event = Event(title: title, month: month, day: day, syncCalendar: syncCalendar)
+        let result = await eventUseCase.newEvent(event)
+        Task { @MainActor in
+          switch result {
+          case .success:
+            didEditFinish?(true)
+            Vibration.success.vibrate()
+          case .failure:
+            didEditFinish?(false)
           }
-          stackView.addArrangedSubview($0)
         }
-
-        ymDivider = UILabel().apply {
-          $0.text = "/"
-          $0.textColor = .ee_date_slash
-          $0.font = .preferredFont(.bold, size: 14)
-          stackView.addArrangedSubview($0)
-        }
-      }
-
-      monthTextField = UITextField().apply {
-        $0.placeholder = "MM"
-        $0.font = .preferredFont(.medium, size: 14)
-        $0.textColor = editable ? .ee_date_editable : .ee_date_disable
-        $0.isEnabled = editable
-        $0.keyboardType = .numberPad
-        $0.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        $0.delegate = self
-        if let month {
-          $0.text = "\(month)".leftPadding(toLength: monthLength, withPad: "0")
-        }
-        stackView.addArrangedSubview($0)
-      }
-
-      mdDivider = UILabel().apply {
-        $0.text = "/"
-        $0.textColor = .ee_date_slash
-        $0.font = .preferredFont(.bold, size: 14)
-        stackView.addArrangedSubview($0)
-      }
-
-      dayTextField = UITextField().apply {
-        $0.placeholder = "dd"
-        $0.font = .preferredFont(.medium, size: 14)
-        $0.textColor = editable ? .ee_date_editable : .ee_date_disable
-        $0.isEnabled = editable
-        $0.keyboardType = .numberPad
-        $0.delegate = self
-        $0.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        if let day {
-          $0.text = "\(day)".leftPadding(toLength: dayLength, withPad: "0")
-        }
-        stackView.addArrangedSubview($0)
       }
     }
+  }
 
-    override func setupConstraints() {
-      stackView.snp.makeConstraints {
-        $0.edges.equalToSuperview()
-      }
-    }
-
-    @objc func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-      textField.resignFirstResponder()
-      return true
-    }
-
-    @objc func textFieldDidChange(_ textField: UITextField) {
-      guard let text = textField.text else { return }
-
-      if textField == yearTextField {
-        if text.count >= yearLength {
-          monthTextField.becomeFirstResponder()
-          ymDivider.textColor = .ee_date_editable
-          cutOverflowedText(textField: textField, length: yearLength)
-        }
-      } else if textField == monthTextField {
-        if text.count >= monthLength {
-          dayTextField.becomeFirstResponder()
-          mdDivider.textColor = .ee_date_editable
-          cutOverflowedText(textField: textField, length: monthLength)
-        }
-      } else if textField == dayTextField {
-        if text.count >= dayLength {
-          dayTextField.resignFirstResponder()
-          cutOverflowedText(textField: textField, length: dayLength)
+  @objc func editWasTapped(_ sender: Any) {
+    Task {
+      if let id = current.id,
+         let title = current.title,
+         let month = current.month,
+         let day = current.day {
+        let syncCalendar = current.syncCalendar
+        let event = Event(id: id, title: title, month: month, day: day, syncCalendar: syncCalendar)
+        let result = await eventUseCase.update(event)
+        await MainActor.run {
+          switch result {
+          case .success:
+            didEditFinish?(true)
+            Vibration.success.vibrate()
+          case .failure:
+            didEditFinish?(false)
+          }
         }
       }
-
-      if editable,
-         let month = monthTextField.text,
-         let day = dayTextField.text,
-         verifyDate(month: month, day: day) {
-        completion?(Int(month)!, Int(day)!)
-      }
     }
+  }
 
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-      guard let text = textField.text else { return false }
-
-      if textField == yearTextField {
-        if text.count >= yearLength && range.length == 0 && range.location < yearLength {
-          return false
+  @objc func deleteWasTapped(_ sender: Any) {
+    guard case let .edit(event) = mode else { return }
+    guard let id = event.id else { return }
+    Task {
+      let result = await eventUseCase.delete(id)
+      await MainActor.run {
+        switch result {
+        case .success:
+          didEditFinish?(true)
+          Vibration.success.vibrate()
+        case .failure:
+          didEditFinish?(false)
         }
-      } else if textField == monthTextField {
-        if text.count >= monthLength && range.length == 0 && range.location < monthLength {
-          return false
-        }
-      } else if textField == dayTextField {
-        if text.count >= dayLength && range.length == 0 && range.location < dayLength {
-          return false
-        }
-      }
-      return true
-    }
-
-    func cutOverflowedText(textField: UITextField, length: Int) {
-      guard let text = textField.text else { return }
-      if text.count > length {
-        let index = text.index(text.startIndex, offsetBy: length)
-        let newString = text[text.startIndex..<index]
-        textField.text = String(newString)
-      }
-    }
-
-    func verifyDate(month ms: String?, day ds: String?) -> Bool {
-      guard
-        let ms, ms.count == monthLength,
-        let m = Int(ms),
-        let ds, ds.count == dayLength,
-        let d = Int(ds)
-      else { return false }
-
-      let dateComps = DateComponents(
-        calendar: .current,
-        year: Date.current.year,
-        month: m,
-        day: d
-      )
-      return dateComps.isValidDate
-    }
-
-    func updateDate(year: Int?, month: Int?, day: Int?) {
-      if let year {
-        yearTextField.text = "\(year)"
-      }
-      if let month {
-        monthTextField.text = "\(month)".leftPadding(toLength: monthLength, withPad: "0")
-      }
-      if let day {
-        dayTextField.text = "\(day)".leftPadding(toLength: dayLength, withPad: "0")
       }
     }
   }

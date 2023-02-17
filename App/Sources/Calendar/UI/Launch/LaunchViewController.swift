@@ -33,7 +33,7 @@ final class LaunchViewController: BaseViewController {
       $0.text = "음력을\n알려줘"
       $0.numberOfLines = 0
       $0.alpha = 0
-      $0.textColor = .t1l_t1
+      $0.textColor = .t1l_f5
       $0.font = .preferredFont(.medium, size: 28)
       view.addSubview($0)
     }
