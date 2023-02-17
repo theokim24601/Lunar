@@ -29,7 +29,6 @@ final class EventListViewController: BaseViewController {
   var events: [Event] = []
 
   var lastLoadedIndex = -1
-  var lastUpdatedIndex = -1
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -170,18 +169,31 @@ final class EventListViewController: BaseViewController {
 
   func reload() {
     let newEvents = eventUseCase?.getAll() ?? []
+    if events.isEmpty {
+      events = newEvents
+      tableView.reloadData()
+      return
+    }
 
-    lastUpdatedIndex = -1
-    if events.count < newEvents.count {
-      for i in 0..<events.count {
-        if let old = events[i].id, let new = newEvents[i].id, old != new {
-          lastUpdatedIndex = i
-          break
-        }
+    let diff = newEvents.difference(from: events)
+    var deletedIndexPaths: [IndexPath] = []
+    var insertedIndexPaths: [IndexPath] = []
+
+    diff.forEach {
+      switch $0 {
+      case let .remove(offset, _, _):
+        deletedIndexPaths.append(IndexPath(row: offset, section: 0))
+      case let .insert(offset, _, _):
+        insertedIndexPaths.append(IndexPath(row: offset, section: 0))
       }
     }
+
     events = newEvents
-    tableView.reloadData()
+
+    tableView.performBatchUpdates {
+      tableView.deleteRows(at: deletedIndexPaths, with: .automatic)
+      tableView.insertRows(at: insertedIndexPaths, with: .automatic)
+    }
   }
 }
 
@@ -207,17 +219,7 @@ extension EventListViewController: UITableViewDataSource {
 
   func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
     let currentIndex = indexPath.row
-    if lastUpdatedIndex > -1, currentIndex == lastUpdatedIndex, lastUpdatedIndex < events.count - 1 {
-      let move = CGAffineTransform(translationX: 20, y: 0)
-      cell.transform = move
-      cell.alpha = 0
-
-      UIView.animate(withDuration: 1.0, delay: 0, options: .curveEaseOut, animations: {
-        cell.transform = CGAffineTransform.identity
-        cell.alpha = 1
-      })
-      lastLoadedIndex = events.count - 1
-    } else if currentIndex > lastLoadedIndex {
+    if currentIndex > lastLoadedIndex {
       let move = CGAffineTransform(translationX: 0, y: 30)
       cell.transform = move
       cell.alpha = 0
