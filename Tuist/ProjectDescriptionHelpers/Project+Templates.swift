@@ -94,7 +94,7 @@ extension Target {
       deploymentTarget: deploymentTarget,
       infoPlist: .extendingDefault(with: [
         "CFBundleShortVersionString": "2.0.0",
-        "CFBundleVersion": "1",
+        "CFBundleVersion": "2",
         "UIMainStoryboardFile": "",
         "UILaunchStoryboardName": "Launch",
         "ITSAppUsesNonExemptEncryption": false,
