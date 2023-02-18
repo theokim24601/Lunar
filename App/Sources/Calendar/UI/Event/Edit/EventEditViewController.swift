@@ -29,6 +29,7 @@ final class EventEditViewController: BottomSheetView, UITextFieldDelegate {
   private var solarDateForm: DateFormView!
   private var editContainerView: UIStackView!
   private var calendarSyncSwitch: UISwitch!
+  private var calendarSyncNoticeLabel: UILabel!
   private var createButton: UIButton!
   private var editButton: UIButton!
   private var deleteButton: UIButton!
@@ -235,20 +236,18 @@ final class EventEditViewController: BottomSheetView, UITextFieldDelegate {
           $0.isOn = current.syncCalendar
         } else {
           $0.isOn = false
-          $0.isEnabled = false
         }
         $0.addTarget(self, action: #selector(syncWasChanged(_:)), for: .valueChanged)
         stackView.addArrangedSubview($0)
       }
     }
 
-    if !defaultSyncValue {
-      UILabel().apply {
-        $0.text = "설정에서 캘린더를 먼저 연동해주세요."
-        $0.font = .preferredFont(.light, size: 11)
-        $0.textColor = .ee_sync_warn
-        contentView.addArrangedSubview($0)
-      }
+    calendarSyncNoticeLabel = UILabel().apply {
+      $0.text = "설정에서 캘린더를 먼저 연동해주세요."
+      $0.font = .preferredFont(.light, size: 11)
+      $0.textColor = .ee_sync_warn
+      $0.isHidden = true
+      contentView.addArrangedSubview($0)
     }
 
     SizedView(height: 20).apply {
@@ -329,12 +328,27 @@ final class EventEditViewController: BottomSheetView, UITextFieldDelegate {
     }
   }
 
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+
+    if case .new = mode {
+      Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { [weak self] _ in
+        self?.titleField?.becomeFirstResponder()
+      }
+    }
+  }
+
   @objc func textFieldDidChange(_ sender: Any) {
     current.title = titleField.text
     validateForm()
   }
 
   @objc func syncWasChanged(_ sendor: Any) {
+    if !defaultSyncValue {
+      calendarSyncSwitch.isOn = false
+      calendarSyncNoticeLabel.isHidden = false
+      return
+    }
     current.syncCalendar = calendarSyncSwitch.isOn
     validateForm()
   }
