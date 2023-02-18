@@ -20,6 +20,15 @@ open class BaseViewController: UIViewController {
     setupConstraints()
   }
 
+  open override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    Task {
+      await MainActor.run {
+        navigationController?.navigationBar.sizeToFit()
+      }
+    }
+  }
+
   open func setupViews() {}
   open func setupConstraints() {}
 

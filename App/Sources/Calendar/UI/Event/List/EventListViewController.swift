@@ -12,8 +12,8 @@ import SnapKit
 
 final class EventListViewController: BaseViewController {
   struct Const {
-    static let topBackgroundMaxHeight: CGFloat = 135
-    static let topBackgroundMinHeight: CGFloat = 125
+    static let topBackgroundInset: CGFloat = 40
+    static let topBackgroundMargin: CGFloat = 28
   }
 
   private var topBackgroundView: UIImageView!
@@ -22,6 +22,7 @@ final class EventListViewController: BaseViewController {
   private var writeButton: UIButton!
 
   private var backgroundHeightConstraint: Constraint?
+  private var backgroundBottomConstraint: Constraint?
 
   var eventEditFlow: ((EventEditMode) -> Void)?
   var settingFlow: (() -> Void)?
@@ -65,9 +66,8 @@ final class EventListViewController: BaseViewController {
       $0.sectionFooterHeight = 0
       $0.tableFooterView = UIView()
       $0.alwaysBounceVertical = false
-      let topPadding: CGFloat = 40
-      $0.contentInset.top = topPadding
-      $0.contentOffset.y = -topPadding
+      $0.contentInset.top = Const.topBackgroundInset
+      $0.contentOffset.y = -Const.topBackgroundInset
       $0.register(cell: EventCell.self)
       $0.register(cell: PlaceholdCell.self)
       view.addSubview($0)
@@ -105,9 +105,9 @@ final class EventListViewController: BaseViewController {
     topBackgroundView.snp.makeConstraints {
       $0.top.equalTo(view.snp.top)
       $0.leading.trailing.equalToSuperview()
-      self.backgroundHeightConstraint = $0.height.equalTo(Const.topBackgroundMaxHeight).constraint
+      self.backgroundBottomConstraint = $0.bottom.equalTo(tableView.snp.top).offset(Const.topBackgroundMargin).constraint
     }
-    backgroundHeightConstraint?.activate()
+    backgroundBottomConstraint?.activate()
     writeButton.snp.makeConstraints {
       $0.trailing.equalToSuperview().offset(-16)
       $0.bottom.equalToSuperview().offset(-40)
@@ -121,16 +121,14 @@ final class EventListViewController: BaseViewController {
   }
 
   func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    let contentOffset = scrollView.contentOffset.y
-
-    var minHeight: CGFloat = Const.topBackgroundMinHeight
-    if let naviMaxY = navigationController?.navigationBar.frame.maxY {
-      minHeight = naviMaxY + 28
+    let topInset = scrollView.contentInset.top
+    let y = scrollView.contentOffset.y
+    if topInset + y > 0 {
+      backgroundBottomConstraint?.update(offset: Const.topBackgroundMargin)
+    } else {
+      let drag = -(topInset + y)
+      backgroundBottomConstraint?.update(offset: Const.topBackgroundMargin + drag)
     }
-
-    var targetHeight = Const.topBackgroundMaxHeight - contentOffset
-    targetHeight = max(minHeight, targetHeight)
-    backgroundHeightConstraint?.update(offset: targetHeight)
   }
 
   @objc func settingWasTapped(_ sender: Any) {
@@ -169,7 +167,7 @@ final class EventListViewController: BaseViewController {
 
   func reload() {
     let newEvents = eventUseCase?.getAll() ?? []
-    if events.isEmpty {
+    if events.isEmpty || newEvents.isEmpty {
       events = newEvents
       tableView.reloadData()
       return

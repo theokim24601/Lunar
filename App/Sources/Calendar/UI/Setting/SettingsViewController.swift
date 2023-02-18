@@ -11,14 +11,14 @@ import SnapKit
 
 final class SettingsViewController: BaseViewController {
   struct Const {
-    static let topBackgroundMaxHeight: CGFloat = 135
-    static let topBackgroundMinHeight: CGFloat = 125
+    static let topBackgroundInset: CGFloat = 40
+    static let topBackgroundMargin: CGFloat = 28
   }
 
   private var topBackgroundView: UIImageView!
   private var tableView: UITableView!
 
-  private var backgroundHeightConstraint: Constraint?
+  private var backgroundBottomConstraint: Constraint?
 
   var eventUseCase: EventUseCase?
   var syncUseCase: SyncUseCase?
@@ -43,9 +43,8 @@ final class SettingsViewController: BaseViewController {
       $0.sectionFooterHeight = 0
       $0.tableFooterView = UIView()
       $0.alwaysBounceVertical = false
-      let topPadding: CGFloat = 40
-      $0.contentInset.top = topPadding
-      $0.contentOffset.y = -topPadding
+      $0.contentInset.top = Const.topBackgroundInset
+      $0.contentOffset.y = -Const.topBackgroundInset
       $0.register(cell: SettingCell.self)
       $0.register(cell: SettingHeaderView.self)
       view.addSubview($0)
@@ -66,22 +65,20 @@ final class SettingsViewController: BaseViewController {
     topBackgroundView.snp.makeConstraints {
       $0.top.equalTo(view.snp.top)
       $0.leading.trailing.equalToSuperview()
-      self.backgroundHeightConstraint = $0.height.equalTo(Const.topBackgroundMaxHeight).constraint
+      self.backgroundBottomConstraint = $0.bottom.equalTo(tableView.snp.top).offset(Const.topBackgroundMargin).constraint
     }
-    backgroundHeightConstraint?.activate()
+    backgroundBottomConstraint?.activate()
   }
 
   func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    let contentOffset = scrollView.contentOffset.y
-
-    var minHeight: CGFloat = Const.topBackgroundMinHeight
-    if let naviMaxY = navigationController?.navigationBar.frame.maxY {
-      minHeight = naviMaxY + 28
+    let topInset = scrollView.contentInset.top
+    let y = scrollView.contentOffset.y
+    if topInset + y > 0 {
+      backgroundBottomConstraint?.update(offset: Const.topBackgroundMargin)
+    } else {
+      let drag = -(topInset + y)
+      backgroundBottomConstraint?.update(offset: Const.topBackgroundMargin + drag)
     }
-
-    var targetHeight = Const.topBackgroundMaxHeight - contentOffset
-    targetHeight = max(minHeight, targetHeight)
-    backgroundHeightConstraint?.update(offset: targetHeight)
   }
 }
 
