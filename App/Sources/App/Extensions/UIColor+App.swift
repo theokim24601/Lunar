@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftUI
+import TheodoreCore
 
 public extension UIColor {
   // MARK: - Splash
@@ -76,38 +77,4 @@ public extension UIColor {
 
   static let grayAAA = UIColor(hex: 0xAAAAAA)
   static let grayEEE = UIColor(hex: 0xEEEEEE)
-}
-
-public extension UIColor {
-  convenience init(r: Int, g: Int, b: Int, a: Float) {
-    assert(r >= 0 && r <= 255, "Invalid red component")
-    assert(g >= 0 && g <= 255, "Invalid green component")
-    assert(b >= 0 && b <= 255, "Invalid blue component")
-
-    self.init(
-      red: CGFloat(r) / 255.0,
-      green: CGFloat(g) / 255.0,
-      blue: CGFloat(b) / 255.0,
-      alpha: CGFloat(a)
-    )
-  }
-
-  convenience init(hex: Int, alpha: Float = 1.0) {
-    self.init(
-      r: (hex >> 16) & 0xff,
-      g: (hex >> 8) & 0xff,
-      b: hex & 0xff,
-      a: alpha
-    )
-  }
-
-  convenience init(light: UIColor, dark: UIColor) {
-    self.init { traitCollection in
-      if traitCollection.userInterfaceStyle == .dark {
-        return dark
-      } else {
-        return light
-      }
-    }
-  }
 }

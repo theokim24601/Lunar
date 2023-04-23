@@ -11,4 +11,6 @@ public extension TargetDependency.SPM {
   static let Realm = TargetDependency.package(product: "RealmSwift")
   static let Scope = TargetDependency.package(product: "Scope")
   static let SnapKit = TargetDependency.package(product: "SnapKit")
+  static let TheodoreCore = TargetDependency.package(product: "TheodoreCore")
+  static let TheodoreUI = TargetDependency.package(product: "TheodoreUI")
 }

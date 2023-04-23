@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import TheodoreCore
 
 final class EventCell: BaseTableViewCell {
   private var containerView: UIView!

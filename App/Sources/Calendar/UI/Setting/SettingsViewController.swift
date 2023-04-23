@@ -8,6 +8,7 @@
 
 import UIKit
 import SnapKit
+import TheodoreCore
 
 final class SettingsViewController: BaseViewController {
   struct Const {
@@ -79,6 +80,28 @@ final class SettingsViewController: BaseViewController {
       let drag = -(topInset + y)
       backgroundBottomConstraint?.update(offset: Const.topBackgroundMargin + drag)
     }
+  }
+  
+  func setupNavigationBar(title: String? = nil) {
+    view.backgroundColor = .el_background
+    navigationItem.title = title
+    navigationController?.view.backgroundColor = .clear
+    navigationController?.navigationBar.prefersLargeTitles = true
+    navigationController?.navigationBar.largeTitleTextAttributes = [
+      NSAttributedString.Key.foregroundColor: UIColor.el_navi_title,
+      NSAttributedString.Key.font: UIFont.preferredFont(.medium, size: 34)
+    ]
+
+    navigationController?.navigationBar.titleTextAttributes = [
+      NSAttributedString.Key.foregroundColor: UIColor.el_navi_title,
+      NSAttributedString.Key.font: UIFont.preferredFont(.regular, size: 16)
+    ]
+    navigationController?.navigationBar.barStyle = .black
+    navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+    navigationController?.navigationBar.shadowImage = UIImage()
+    navigationController?.navigationBar.backgroundColor = .clear
+    navigationController?.navigationBar.isTranslucent = true
+    navigationController?.navigationBar.tintColor = .el_navi_title
   }
 }
 

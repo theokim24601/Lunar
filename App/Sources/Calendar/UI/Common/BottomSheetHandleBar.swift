@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import TheodoreCore
 
 class BottomSheetHandleBar: BaseView {
   private var imageView: UIImageView!

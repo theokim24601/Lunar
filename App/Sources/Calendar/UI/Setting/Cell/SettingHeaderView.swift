@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import TheodoreCore
 
 class SettingHeaderView: BaseTableViewHeaderView {
   var titleLabel: UILabel!

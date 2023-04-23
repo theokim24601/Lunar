@@ -6,7 +6,8 @@ let packages: [Package] = [
   Package.KeychainAccess,
   Package.Realm,
   Package.Scope,
-  Package.SnapKit
+  Package.SnapKit,
+  Package.Theodore
 ]
 
 let dependencies = Dependencies(

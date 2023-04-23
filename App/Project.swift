@@ -9,7 +9,8 @@ let project = Project.app(
     Package.KeychainAccess,
     Package.Realm,
     Package.Scope,
-    Package.SnapKit
+    Package.SnapKit,
+    Package.Theodore
   ],
   dependencies: [
     .SPM.FirebaseAnalytics,
@@ -17,6 +18,8 @@ let project = Project.app(
     .SPM.KeychainAccess,
     .SPM.Realm,
     .SPM.Scope,
-    .SPM.SnapKit
+    .SPM.SnapKit,
+    .SPM.TheodoreCore,
+    .SPM.TheodoreUI
   ]
 )

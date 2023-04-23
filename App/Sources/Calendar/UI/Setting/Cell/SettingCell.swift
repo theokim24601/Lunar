@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import TheodoreCore
 
 struct SettingCellForm {
   var icon: UIImage

@@ -21,4 +21,8 @@ public extension Package {
     url: "https://github.com/SnapKit/SnapKit.git",
     requirement: .upToNextMajor(from: "5.6.0")
   )
+  static let Theodore = remote(
+    url: "https://github.com/hb1love/Theodore.git",
+    requirement: .upToNextMajor(from: "0.2.0")
+  )
 }
